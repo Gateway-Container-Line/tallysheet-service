@@ -9,16 +9,16 @@ type TallySheet struct {
 	IdTally             uint `gorm:"primaryKey;autoIncrement" json:"id_tally"` //buat
 	BookingConfirmation `gorm:"embeded"`
 	//Booking_Code      string `gorm:"varchar(16)" json:"booking_code"`
-	PageTally    int64  `gorm:"varchar(10)" json:"page_tally"`     //buat
-	DateTally    string `gorm:"date" json:"date_tally"`            //buat
-	TruckNoTally int64  `gorm:"varchar(10)" json:"truck_no_tally"` //buat
+	PageTally int64  `gorm:"varchar(10)" json:"page_tally"` //buat
+	DateTally string `gorm:"date" json:"date_tally"`        //buat
+	TruckNo   int64  `gorm:"varchar(10)" json:"truck_no"`   //buat
 
-	ContainerandSealNoTally string `gorm:"varchar(50)" json:"container_seal_no_tally"` //buat
+	ContainerandSealNo string `gorm:"varchar(50)" json:"container_seal_no"` //buat
 	//VesselTally      string `gorm:"varchar(30)" json:"vessel_tally"`       //buat
-	SizeTally int8 `gorm:"varchar(30)" json:"size_tally"` //buat
+	SizeinTally int8 `gorm:"varchar(30)" json:"size_in_tally"` //buat
 	//Voyage                  string `gorm:"varchar(30)" json:"voyage"`                  //voyage
-	StuffingPlanDateTally string         `gorm:"date" json:"stuffingplan_date_tally"` //buat date time
-	GodownLocationTally   sql.NullString `gorm:"varchar(100)" json:"godown_location"` //no rak buat
+	StuffingPlanDate string         `gorm:"date" json:"stuffingplan_date"`     //buat date time
+	GodownLocation   sql.NullString `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
 
 	DimensionLTally int8 `gorm:"varchar(30)" json:"dimension_l_tally"`
 	DimensionWTally int8 `gorm:"varchar(30)" json:"dimension_w_tally"`
