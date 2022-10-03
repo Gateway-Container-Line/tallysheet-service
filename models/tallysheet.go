@@ -1,7 +1,8 @@
 package models
 
 import (
-	"database/sql"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -14,11 +15,10 @@ type TallySheet struct {
 	TruckNo   int64  `gorm:"varchar(10)" json:"truck_no"`   //buat
 
 	ContainerandSealNo string `gorm:"varchar(50)" json:"container_seal_no"` //buat
-	//VesselTally      string `gorm:"varchar(30)" json:"vessel_tally"`       //buat
-	SizeinTally int8 `gorm:"varchar(30)" json:"size_in_tally"` //buat
+	SizeinTally        int8   `gorm:"varchar(30)" json:"size_in_tally"`     //buat
 	//Voyage                  string `gorm:"varchar(30)" json:"voyage"`                  //voyage
-	StuffingPlanDate string         `gorm:"date" json:"stuffingplan_date"`     //buat date time
-	GodownLocation   sql.NullString `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
+	StuffingPlanDate string `gorm:"date" json:"stuffingplan_date"`     //buat date time
+	GodownLocation   string `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
 
 	DimensionLTally int8 `gorm:"varchar(30)" json:"dimension_l_tally"`
 	DimensionWTally int8 `gorm:"varchar(30)" json:"dimension_w_tally"`
@@ -27,32 +27,54 @@ type TallySheet struct {
 	CbmTally        int8 `gorm:"varchar(30)" json:"cbm_Tally"`
 
 	Condition   `gorm:"embeded"`
-	StatusTally sql.NullString `gorm:"varchar(30)" json:"status_tally"`
+	StatusTally string `gorm:"varchar(30)" json:"status_tally"`
 
 	SignSuratJalan    string `gorm:"varchar(50)" json:"sign_surat_jalan"`
 	SignDokumenExport string `gorm:"varchar(50)" json:"sign_dokumen_export"`
 
-	FullnameTally string    `gorm:"varchar(150)" json:"fullname_tally"`
-	CreatedAt     time.Time `gorm:"date"`
-	UpdateAt      time.Time `gorm:"date"`
+	FullnameTally string `gorm:"varchar(150)" json:"fullname_tally"`
+	CreatedAt     string `gorm:"varchar(50)"`
+	UpdateAt      string `gorm:"varchar(50)"`
 }
 
 type Condition struct {
 	InCondition     `gorm:"embeded"`
 	OutCondition    `gorm:"embeded"`
-	AlasanCondition sql.NullString `gorm:"varchar(50)" json:"alasan_condition"`
+	AlasanCondition string `gorm:"varchar(50)" json:"alasan_condition"`
 }
 
 type InCondition struct {
-	InGood   sql.NullInt16 `gorm:"varchar(10)" json:"condition_in_good"`
-	InDamage sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_damage"`
-	InShort  sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_short"`
-	InOver   sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_over"`
+	InGood   int16 `gorm:"varchar(10)" json:"condition_in_good"`
+	InDamage int16 `gorm:"varchar(30)" json:"condition_in_damage"`
+	InShort  int16 `gorm:"varchar(30)" json:"condition_in_short"`
+	InOver   int16 `gorm:"varchar(30)" json:"condition_in_over"`
 }
 
 type OutCondition struct {
-	OutGood   sql.NullInt16 `gorm:"varchar(10)" json:"condition_in_good"`
-	OutDamage sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_damage"`
-	OutShort  sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_short"`
-	OutOver   sql.NullInt16 `gorm:"varchar(30)" json:"condition_in_over"`
+	OutGood   int16 `gorm:"varchar(10)" json:"condition_out_good"`
+	OutDamage int16 `gorm:"varchar(30)" json:"condition_out_damage"`
+	OutShort  int16 `gorm:"varchar(30)" json:"condition_out_short"`
+	OutOver   int16 `gorm:"varchar(30)" json:"condition_out_over"`
+}
+
+func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
+	logrus.Info("Test before update")
+	//if tx.Statement.Changed() {
+	//	tallysheet.UpdateAt = time.Now().Format("02-01-2006 15:04:05 Mon")
+	//	//tx.Statement.SetColumn("update_at", time.Now().Format("02-01-2006 15:04:05 Mon"))
+	//	tx.Model(&tallysheet).Updates(&tallysheet)
+	//}
+	//return nil
+	tallysheet.UpdateAt = time.Now().Format("02-01-2006 15:04:05 Mon")
+	//DB.Model(&tallysheet.UpdateAt).Where("booking_code = ?", &tallysheet.BookingCode).Updates(&tallysheet.UpdateAt)
+	DB.Model(&tallysheet.UpdateAt).Save(&tallysheet.UpdateAt)
+	return nil
+}
+
+func (tallysheet *TallySheet) BeforeCreate(tx *gorm.DB) (err error) {
+	logrus.Info("Test Before Create")
+	tallysheet.CreatedAt = time.Now().Format("02-01-2006 15:04:05 Mon")
+	DB.Model(&tallysheet.CreatedAt).Save(&tallysheet.CreatedAt)
+	//DB.Model(&tallysheet.UpdateAt).Where("booking_code = ?", &tallysheet.BookingCode).Updates(&tallysheet.UpdateAt)
+	return nil
 }

@@ -10,6 +10,7 @@ RUN go mod tidy
 
 RUN go build -o tallysheet-service
 
+RUN export GO111MODULE=on
 
 ENTRYPOINT ["/app/tallysheet-service"]
 

@@ -3,7 +3,7 @@ package models
 type BookingDetail struct {
 	BookingCode     string `gorm:"varchar(18)" json:"booking_code"`
 	DestinationCity string `gorm:"varchar(100)" json:"destination_city"`
-	Voyage          string `gorm:"varchar(50)" json:"voyage"`
+	VesselVoyage    string `gorm:"varchar(50)" json:"vessel_voyage"`
 }
 
 type GoodsDetail struct {

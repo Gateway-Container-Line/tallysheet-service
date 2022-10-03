@@ -18,7 +18,7 @@ func GetBookingConfirmationData(w http.ResponseWriter, r *http.Request) {
 	// (e.g. Redis) by performing a simple PING, and include them in the response.
 	//io.WriteString(w, `{"alive": true}`)
 	logrus.Info("Mengambil API ...")
-	quotation, err := http.Get("https://gateway-cl.com/api/quotation_gateway?X-API-KEY=gateway-fms&booking_code=QN-05082022-0001")
+	quotation, err := http.Get("https://gateway-cl.com/api/quotation_gateway?X-API-KEY=gateway-fms&booking_code=SEGN")
 	if err != nil {
 		log.Fatal(err)
 		logrus.Error("Tidak bisa mengambil API!")

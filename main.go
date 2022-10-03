@@ -35,10 +35,13 @@ func main() {
 	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.DeleteTallySheet).Methods("DELETE")
 
 	//update tally surat jalan
-	r.HandleFunc("/api/surat-jalan/{id_tally}", documentconfirmationcontroller.ConfirmationSuratJalan).Methods("PUT")
+	r.HandleFunc("/api/surat-jalan/{booking-code}", documentconfirmationcontroller.ConfirmationSuratJalan).Methods("PUT")
 
 	//update tally doc export
-	r.HandleFunc("/api/document-export/{id_tally}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
+	r.HandleFunc("/api/document-export/{booking-code}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
+
+	//update godownlocation
+	//r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.UpdateGodownLocation).Queries("godownlocation")
 
 	log.Fatal(http.ListenAndServe(":8081", r))
 }

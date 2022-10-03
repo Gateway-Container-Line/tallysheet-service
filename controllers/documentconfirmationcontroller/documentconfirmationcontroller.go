@@ -11,19 +11,20 @@ import (
 
 func ConfirmationSuratJalan(w http.ResponseWriter, r *http.Request) {
 	paramurl := mux.Vars(r)
-	id_tally := paramurl["id_tally"]
+	bookingCode := paramurl["booking-code"]
 
 	//contoh saja, nanti gampang diganti setelah proses jwt dan middleware
 	nama_tallyman := "zakki"
 
-	logrus.Debug("Berhasil mendapat data. data id_tally : ", id_tally)
+	logrus.Debug("Berhasil mendapat data. data booking code : ", bookingCode)
+
 	var tallysheet models.TallySheet
 	tallysheet.SignSuratJalan = time.Now().Format("02-01-2006 15:04:05 Mon ") + nama_tallyman
 	//tallysheet.SignSuratJalan = fmt.Sprintf("%s%s", waktu_sekarang.String(), nama_tallyman)
 	logrus.Debug("Sign Surat Jalan : ", tallysheet.SignSuratJalan)
 
 	// input ke database
-	if models.DB.Where("id_tally = ?", id_tally).Updates(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Updates(&tallysheet).RowsAffected == 0 {
 		response := map[string]string{"message": "Tidak dapat mengupdate signsuratjalan"}
 		helper.ResponseJSON(w, http.StatusBadRequest, response)
 		return
@@ -36,18 +37,18 @@ func ConfirmationSuratJalan(w http.ResponseWriter, r *http.Request) {
 
 func ConfirmationDocumentExport(w http.ResponseWriter, r *http.Request) {
 	paramurl := mux.Vars(r)
-	id_tally := paramurl["id_tally"]
+	bookingCode := paramurl["booking-code"]
 
 	//contoh saja, nanti gampang diganti setelah proses jwt dan middleware
 	nama_tallyman := "zakki"
 
-	logrus.Debug("Berhasil mendapat data. data id_tally : ", id_tally)
+	logrus.Debug("Berhasil mendapat data. data booking_code : ", bookingCode)
 	var tallysheet models.TallySheet
 	tallysheet.SignDokumenExport = time.Now().Format("02-01-2006 15:04:05 Mon ") + nama_tallyman
 	logrus.Debug("Sign Surat Jalan : ", tallysheet.SignSuratJalan)
 
 	// input ke database
-	if models.DB.Where("id_tally = ?", id_tally).Updates(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Updates(&tallysheet).RowsAffected == 0 {
 		response := map[string]string{"message": "Tidak dapat mengupdate signdocumentexport"}
 		helper.ResponseJSON(w, http.StatusBadRequest, response)
 		return
