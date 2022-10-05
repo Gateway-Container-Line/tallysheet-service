@@ -23,8 +23,8 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	var tallysheet []models.TallySheet
 	if models.DB.Where("booking_code = ?", bookingCode).First(&tallysheet).RowsAffected == 0 {
 		response := map[string]string{"message": "Tallysheet Not Found!"}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+		helper.ResponseJSON(w, http.StatusNotFound, response)
 		return
 	}
-	helper.ResponseJSON(w, http.StatusBadRequest, tallysheet)
+	helper.ResponseJSON(w, http.StatusOK, tallysheet)
 }
