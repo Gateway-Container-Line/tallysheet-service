@@ -40,8 +40,5 @@ func main() {
 	//update tally doc export
 	r.HandleFunc("/api/document-export/{booking-code}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
 
-	//update godownlocation
-	//r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.UpdateGodownLocation).Methods("PUT")
-
 	log.Fatal(http.ListenAndServe(":8081", r))
 }
