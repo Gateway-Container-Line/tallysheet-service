@@ -32,7 +32,7 @@ type TallySheet struct {
 	Condition `gorm:"embeded"`
 	//Condition   []Condition
 
-	TallyTable        TallyTable `gorm:"references:IdTable;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	TallyTable        TallyTable `gorm:"references:IdTable;constraint:OnDelete:CASCADE;"`
 	TallyTableIdTable int
 
 	PICTallyman string `gorm:"varchar(150)" json:"PIC_Tallyman"`
