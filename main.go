@@ -14,7 +14,7 @@ import (
 func main() {
 	models.ConnectDatabase()
 	logrus.Debug("Server running up...")
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true).UseEncodedPath()
 
 	//Get Data From BookingCode
 	r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
@@ -23,6 +23,8 @@ func main() {
 	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
 
 	//tally sheet detail
+	//r.HandleFunc("/api/tally-sheet",tallysheetcontroller.TallySheetDetail).Methods("GET")
+	//router := mux.NewRouter().StrictSlash(true).UseEncodedPath()
 	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.TallySheetDetail).Methods("GET")
 
 	//input tally

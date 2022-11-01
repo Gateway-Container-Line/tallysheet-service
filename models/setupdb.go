@@ -10,7 +10,7 @@ var DB *gorm.DB
 
 func ConnectDatabase() {
 	// konfigurasi db mysql
-	db, err := gorm.Open(mysql.Open("root:@tcp(mysql)/gateway_warehouse"))
+	db, err := gorm.Open(mysql.Open("root:@tcp(mysql)/gateway_warehouse?parseTime=true"))
 	//sqlDB, err := sql.Open("mysql", "root:''@tcp(mysql)/gateway_warehouse?allowOldPasswords=true")
 	//db, err := gorm.Open(mysql.New(mysql.Config{Conn: sqlDB}), &gorm.Config{})
 
@@ -18,7 +18,7 @@ func ConnectDatabase() {
 		panic(err)
 	}
 
-	db.AutoMigrate(&TallySheet{})
+	db.AutoMigrate(&TallySheet{}, &TallyTable{})
 	DB = db
 	logrus.Info("berhasil connect ke database")
 }

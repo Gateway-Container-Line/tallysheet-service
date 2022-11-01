@@ -6,10 +6,17 @@ import (
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"net/http"
 )
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
+	//cors
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+	w.Header().Set("Content-Type", "application/json")
+
 	//mengambil inputan json yang diterima dari frontend
 	var tallyInput models.TallySheet
 	decoder := json.NewDecoder(r.Body)
@@ -65,11 +72,18 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var tallysheet models.TallySheet
 	tallysheet = tallyInput
-	if models.DB.Where("booking_code = ?", bookingCode).Updates(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
 		response := map[string]string{"message": "Tallysheet Not Found!"}
 		helper.ResponseJSON(w, http.StatusBadRequest, response)
 		return
 	}
+
+	//if models.DB.Model(&tallysheet.TallyTable).Where("IdTable = ?", tallysheet.TallyTableIdTable).Updates(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tallysheet Not Found!"}
+	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+	//	return
+	//}
+
 	response := map[string]string{"message": "TallySheet Updated Successfully!"}
 	helper.ResponseJSON(w, http.StatusOK, response)
 
@@ -84,7 +98,7 @@ func DeleteTallySheet(w http.ResponseWriter, r *http.Request) {
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
 
-	if models.DB.Where("booking_code = ?", bookingCode).Delete(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Select(clause.Associations).Delete(&tallysheet).RowsAffected == 0 {
 		response := map[string]string{"message": "Tallysheet Not Found!"}
 		helper.ResponseJSON(w, http.StatusBadRequest, response)
 		return
