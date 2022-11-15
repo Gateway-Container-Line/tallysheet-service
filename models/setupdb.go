@@ -15,7 +15,10 @@ func ConnectDatabase() {
 	//db, err := gorm.Open(mysql.New(mysql.Config{Conn: sqlDB}), &gorm.Config{})
 
 	if err != nil {
+		logrus.Println("Connection failed", err)
 		panic(err)
+	} else {
+		logrus.Println("Connection established")
 	}
 
 	db.AutoMigrate(&TallySheet{}, &TallyTable{})

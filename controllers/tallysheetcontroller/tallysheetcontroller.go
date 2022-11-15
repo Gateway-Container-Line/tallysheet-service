@@ -5,49 +5,61 @@ import (
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
 )
 
 func TallySheet(w http.ResponseWriter, r *http.Request) {
 	var tallysheet []models.TallySheet
-	if models.DB.Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
-		response := map[string]string{"message": "Tidak ada tally sheet"}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+	if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	helper.ResponseJSON(w, http.StatusBadRequest, tallysheet)
+	//if models.DB.Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tidak ada tally sheet"}
+	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+	//	return
+	//}
+	helper.ResponseJSON(w, http.StatusOK, tallysheet)
 }
 
 func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
-	//if err := r.ParseForm(); err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
 
 	paramurl := mux.Vars(r)
-	//paramurl := r.FormValue("booking-code")
-	//logrus.Info("Paramurl : " + paramurl)
-
-	//bookingCode := r.URL.Query().Get("booking-code")
-
-	//logrus.Info(paramurl)
-	//bookingCode, err := url.QueryUnescape(paramurl)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//bookingCode := EncodeParam(s)
 	bookingCode := paramurl["booking-code"]
-
 	logrus.Info("BC : " + bookingCode)
+
+	var tallysheet models.TallySheet
+	if err := models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	//if models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tallysheet Not Found!"}
+	//	helper.ResponseJSON(w, http.StatusNotFound, response)
+	//	return
+	//}
+	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+}
+
+func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Bukan BC")
 	var tallysheet []models.TallySheet
-	if models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).RowsAffected == 0 {
-		response := map[string]string{"message": "Tallysheet Not Found!"}
-		helper.ResponseJSON(w, http.StatusNotFound, response)
+	if err := models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
-	w.Header().Set("Content-Type", "application/json")
+	//if models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tidak ada tally sheet"}
+	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+	//	return
+	//}
 	helper.ResponseJSON(w, http.StatusOK, tallysheet)
 }

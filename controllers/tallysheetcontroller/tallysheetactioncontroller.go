@@ -6,35 +6,27 @@ import (
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
 )
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
-	//cors
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET")
-	w.Header().Set("Content-Type", "application/json")
-
 	//mengambil inputan json yang diterima dari frontend
 	var tallyInput models.TallySheet
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tallyInput); err != nil {
-		response := map[string]string{"message": err.Error()}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer r.Body.Close()
 
 	//input data ke database penyimpanan
 	if err := models.DB.Create(&tallyInput).Error; err != nil {
-		response := map[string]string{"message": err.Error()}
-		helper.ResponseJSON(w, http.StatusInternalServerError, response)
+		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response := map[string]string{"message": "success"}
+	response := map[string]string{"message": "Success Create Tallysheet"}
 	helper.ResponseJSON(w, http.StatusOK, response)
 
 	// input id tally to db redis
@@ -45,39 +37,48 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//	logrus.Error("Unable To Set Data to Redis.", err)
 	//	return
 	//}
-	logrus.Info("Berhasil mengirimkan data ke DB")
-	//booking_code, err := RDB.Get(context.Background(), "booking_code").Result()
-	//if err != nil {
-	//	logrus.Error("Gagal mendapat Data")
-	//}
-	//logrus.Info("Berhasil mendapat data. data : ", booking_code)
+	logrus.Info("Success Create Tallysheet")
 }
 
 func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
+	//if r.Method == "OPTIONS" {
+	//	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//	w.Header().Set("Access-Control-Allow-Methods", "*")
+	//	w.Header().Set("Access-Control-Allow-Headers", "*")
+	//	w.Write([]byte("allowed"))
+	//	return
+	//}
+
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
 
+	//req, _ := http.NewRequest(http.MethodOptions, "http://host.docker.internal:8081/api/tally-sheet/"+bookingCode, nil)
+	//resp, err := http.DefaultClient.Do(req)
+	////resp, err := client.Do(rackingin)
+	//if err != nil {
+	//	log.Fatalln(err)
+	//}
+	//defer resp.Body.Close()
 	// mengambil id rak dari url
 
 	logrus.Info("Berhasil mendapat booking code dari url. data : " + bookingCode)
 
 	// input data ke database
-	var tallyInput models.TallySheet
+	var tallysheet models.TallySheet
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&tallyInput); err != nil {
-		response := map[string]string{"message": err.Error()}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+	if err := decoder.Decode(&tallysheet); err != nil {
+		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer r.Body.Close()
-	var tallysheet models.TallySheet
-	tallysheet = tallyInput
-	if models.DB.Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
-		response := map[string]string{"message": "Tallysheet Not Found!"}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+
+	if models.DB.Where("booking_code = ?", bookingCode).Updates(&tallysheet).RowsAffected == 0 {
+		helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
 		return
 	}
 
+	tallysheet.BookingCode = bookingCode
+	//.Session(&gorm.Session{FullSaveAssociations: true})
 	//if models.DB.Model(&tallysheet.TallyTable).Where("IdTable = ?", tallysheet.TallyTableIdTable).Updates(&tallysheet).RowsAffected == 0 {
 	//	response := map[string]string{"message": "Tallysheet Not Found!"}
 	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
@@ -92,15 +93,13 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTallySheet(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var tallysheet models.TallySheet
 
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
 
+	var tallysheet models.TallySheet
 	if models.DB.Where("booking_code = ?", bookingCode).Select(clause.Associations).Delete(&tallysheet).RowsAffected == 0 {
-		response := map[string]string{"message": "Tallysheet Not Found!"}
-		helper.ResponseJSON(w, http.StatusBadRequest, response)
+		helper.ResponseError(w, http.StatusBadRequest, "Tallysheet Not Found!")
 		return
 	}
 	response := map[string]string{"message": "TallySheet Deleted Successfully!"}
