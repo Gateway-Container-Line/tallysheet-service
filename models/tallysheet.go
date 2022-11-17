@@ -21,7 +21,9 @@ type TallySheet struct {
 	ContainerandSealNo string `gorm:"varchar(50)" json:"container_seal_no"` //gabungan antara container number dan seal number dari real container
 	Size               string `gorm:"varchar(30)" json:"size"`              //size dari container
 	StuffingPlanDate   string `gorm:"date" json:"stuffingplan_date"`        //buat date time
-	GodownLocation     string `gorm:"varchar(10)" json:"godownlocation"`    //no rak buat
+
+	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`  // ada 3 condition true false loaded
+	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
 
 	DimensionLTally float32 `gorm:"varchar(30)" json:"dimension_l_tally"`
 	DimensionWTally float32 `gorm:"varchar(30)" json:"dimension_w_tally"`
