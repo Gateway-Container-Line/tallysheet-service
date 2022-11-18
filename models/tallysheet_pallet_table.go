@@ -1,7 +1,8 @@
 package models
 
 type TallyTable struct {
-	IdTable    int `gorm:"primaryKey; autoIncrement"`
+	ID int `gorm:"autoIncrement"`
+	//`gorm:"primaryKey; autoIncrement"`
 	NonPallets `gorm:"embeded"`
 	Pallets    `gorm:"embeded"`
 }

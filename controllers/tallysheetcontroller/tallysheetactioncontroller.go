@@ -6,6 +6,7 @@ import (
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
 )
@@ -15,7 +16,7 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	var tallyInput models.TallySheet
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tallyInput); err != nil {
-		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+		helper.ResponseError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer r.Body.Close()
@@ -72,7 +73,7 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if models.DB.Where("booking_code = ?", bookingCode).Updates(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
 		helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
 		return
 	}
