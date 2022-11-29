@@ -1,5 +1,41 @@
 package tallysheetcontroller
 
+import (
+	"github.com/Gateway-Container-Line/tallysheet-service/helper"
+	"github.com/Gateway-Container-Line/tallysheet-service/models"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"net/http"
+)
+
+func QuantityTally(w http.ResponseWriter, r *http.Request) {
+	paramurl := mux.Vars(r)
+	bookingCode := paramurl["booking-code"]
+
+	logrus.Info("Berhasil mendapat booking code dari url. data : " + bookingCode)
+
+	var tallysheet models.TallySheet
+	if err := models.DB.Distinct("id", "booking_code", "quantity").Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	response := map[string]interface{}{
+		"ID":           tallysheet.ID,
+		"booking_code": tallysheet.BookingCode,
+		"quantity":     tallysheet.Quantity,
+	}
+	helper.ResponseJSON(w, http.StatusOK, response)
+
+}
+
 //func UpdateGodownLocation(w http.ResponseWriter, r *http.Request) {
 //	paramurl := mux.Vars(r)
 //	bookingCode := paramurl["booking-code"]

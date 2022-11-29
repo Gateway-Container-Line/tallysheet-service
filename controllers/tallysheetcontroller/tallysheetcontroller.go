@@ -13,8 +13,14 @@ import (
 func TallySheet(w http.ResponseWriter, r *http.Request) {
 	var tallysheet []models.TallySheet
 	if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
-		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-		return
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 	//if models.DB.Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
 	//	response := map[string]string{"message": "Tidak ada tally sheet"}
@@ -52,9 +58,15 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("Bukan BC")
 	var tallysheet []models.TallySheet
-	if err := models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
-		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-		return
+	if err := models.DB.Where("racking_status = 'false' OR ''").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 	//if models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
 	//	response := map[string]string{"message": "Tidak ada tally sheet"}

@@ -78,6 +78,9 @@ func main() {
 	//router := mux.NewRouter().StrictSlash(true).UseEncodedPath()
 	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.TallySheetDetail).Methods("GET")
 
+	//tallysheet get quantity
+	r.HandleFunc("/api/quantity-tally/{booking-code}", tallysheetcontroller.QuantityTally).Methods("GET")
+
 	//input tally
 	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.InputTallyForm).Methods("POST")
 
