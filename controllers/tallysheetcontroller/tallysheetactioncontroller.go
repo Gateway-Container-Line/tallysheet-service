@@ -27,6 +27,9 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logrus.Info("Success Input to Database")
+	//updatestatus, err := http.NewRequest(http.MethodPut, "https://gateway-cl.com/api/update_cargo_status")
+
 	response := map[string]string{"message": "Success Create Tallysheet"}
 	helper.ResponseJSON(w, http.StatusOK, response)
 

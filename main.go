@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/Gateway-Container-Line/tallysheet-service/controllers/admincontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/bookingconfirmationcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/documentconfirmationcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/tallysheetcontroller"
@@ -67,6 +68,7 @@ func main() {
 	//h := handlers.AllowedHeaders([]string{"*"})
 	//m := handlers.AllowedMethods([]string{"*"})
 	//o := handlers.AllowedOrigins([]string{"*"})
+
 	//Get Data From BookingCode
 	r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
 
@@ -98,6 +100,19 @@ func main() {
 
 	//update tally doc export
 	r.HandleFunc("/api/document-export/{booking-code}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
+
+	//Count All Tally
+	r.HandleFunc("/api/count/tally-sheet", admincontroller.CountTallySheet).Methods("GET")
+	//Count All Cargo In
+	r.HandleFunc("/api/count/cargo-in", admincontroller.CountCargoIn).Methods("GET")
+	//Count All Cargo Out
+	r.HandleFunc("/api/count/cargo-out", admincontroller.CountCargoOut).Methods("GET")
+	//Count All Cargo Coloaded
+	r.HandleFunc("/api/count/cargo-coloaded", admincontroller.CargoCoload).Methods("GET")
+	//Count Tally In Rack
+	r.HandleFunc("/api/count/cargoinrack", admincontroller.CountCargoInRack).Methods("GET")
+	//Count Cargo Loaded in Container
+	r.HandleFunc("/api/count/cargoloaded", admincontroller.CountCargoLoadedInContainer).Methods("GET")
 
 	handler := cors.AllowAll().Handler(r)
 
