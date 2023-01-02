@@ -17,19 +17,20 @@ type TallySheet struct {
 	DateTally string `gorm:"date" json:"date_tally"`
 	TruckNo   string `gorm:"varchar(10)" json:"truck_no"` //tanyakan lagi bentuk nya spt apa
 
-	PartyTally         string `gorm:"varchar(20)" json:"party_tally"`       // quantity + packing
-	ContainerandSealNo string `gorm:"varchar(50)" json:"container_seal_no"` //gabungan antara container number dan seal number dari real container
-	Size               string `gorm:"varchar(30)" json:"size"`              //size dari container
-	StuffingPlanDate   string `gorm:"date" json:"stuffingplan_date"`        //buat date time
+	PartyTally       string `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
+	ContainerNo      string `gorm:"varchar(50)" json:"container_no"`
+	SealNo           string `gorm:"varchar(50)" json:"seal_no"`
+	Size             string `gorm:"varchar(30)" json:"size"`       //size dari container
+	StuffingPlanDate string `gorm:"date" json:"stuffingplan_date"` //buat date time
 
 	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`  // ada 3 condition true false loaded
 	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
 
-	DimensionLTally float32 `gorm:"varchar(30)" json:"dimension_l_tally"`
-	DimensionWTally float32 `gorm:"varchar(30)" json:"dimension_w_tally"`
-	DimensionHTally float32 `gorm:"varchar(30)" json:"dimension_h_tally"`
+	//DimensionLTally float32 `gorm:"varchar(30)" json:"dimension_l_tally"` //dimension dibuat di table
+	//DimensionWTally float32 `gorm:"varchar(30)" json:"dimension_w_tally"`
+	//DimensionHTally float32 `gorm:"varchar(30)" json:"dimension_h_tally"`
 	//QTYTally        int8 `gorm:"varchar(30)" json:"qty_tally"` // sama dengan quantity yang di booking confirmation hanya saja ini actual datanya
-	CbmTally float32 `gorm:"varchar(30)" json:"cbm_Tally"`
+	//CbmTally float32 `gorm:"varchar(30)" json:"cbm_Tally"`  // meas dibuat di table
 
 	Condition `gorm:"embeded"`
 	//Condition   []Condition
