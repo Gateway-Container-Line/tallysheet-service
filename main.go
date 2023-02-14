@@ -70,7 +70,8 @@ func main() {
 	//o := handlers.AllowedOrigins([]string{"*"})
 
 	//Get Data From BookingCode
-	r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
+	//r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
+	r.HandleFunc("/api/scan/in/{booking-code}", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
 
 	//List all tally
 	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
@@ -91,6 +92,17 @@ func main() {
 
 	//delete tally
 	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.DeleteTallySheet).Methods("DELETE")
+
+	//delete marking
+	r.HandleFunc("/api/tally-sheet/marking/delete", tallysheetcontroller.DeleteMarking).Methods("DELETE")
+	//r.HandleFunc("/api/tally-sheet/marking/{booking-code}/{marking}", tallysheetcontroller.DeleteMarking).Methods("DELETE")
+
+	//append Marking
+	r.HandleFunc("/api/tally-sheet/marking/append", tallysheetcontroller.AppendMarking).Methods("POST")
+	//r.HandleFunc("/api/tally-sheet/marking/{booking-code}", tallysheetcontroller.AppendMarking).Methods("PUT")
+
+	//update Marking
+	r.HandleFunc("/api/tally-sheet/marking/update", tallysheetcontroller.UpdateMarking).Methods("PUT")
 
 	//tallysheet not in rack
 	r.HandleFunc("/api/tally-sheet-not-in-rack", tallysheetcontroller.TallyNotInRack).Methods("GET")

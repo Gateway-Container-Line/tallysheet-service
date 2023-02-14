@@ -44,7 +44,7 @@ func ConfirmationDocumentExport(w http.ResponseWriter, r *http.Request) {
 
 	logrus.Debug("Berhasil mendapat data. data booking_code : ", bookingCode)
 	var tallysheet models.TallySheet
-	tallysheet.SignDokumenExport = time.Now().Format("02-01-2006 15:04:05 Mon ") + nama_tallyman
+	tallysheet.SignDocumentExport = time.Now().Format("02-01-2006 15:04:05 Mon ") + nama_tallyman
 	logrus.Debug("Sign Surat Jalan : ", tallysheet.SignSuratJalan)
 
 	// input ke database

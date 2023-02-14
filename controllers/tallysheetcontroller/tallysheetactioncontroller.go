@@ -67,16 +67,23 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 
 	logrus.Info("Berhasil mendapat booking code dari url. data : " + bookingCode)
 
-	// input data ke database
+	// input data to struct tallysheet
 	var tallysheet models.TallySheet
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tallysheet); err != nil {
 		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	defer r.Body.Close()
 
-	if models.DB.Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
+	//upsert
+	//if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Clauses(clause.OnConflict{UpdateAll: true}).Updates(&tallysheet).RowsAffected == 0 {
+	//	helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
+	//	return
+	//}
+	//update
+	if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
 		helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
 		return
 	}
@@ -102,7 +109,7 @@ func DeleteTallySheet(w http.ResponseWriter, r *http.Request) {
 	bookingCode := paramurl["booking-code"]
 
 	var tallysheet models.TallySheet
-	if models.DB.Where("booking_code = ?", bookingCode).Select(clause.Associations).Delete(&tallysheet).RowsAffected == 0 {
+	if models.DB.Where("booking_code = ?", bookingCode).Select("MarkingData.MarkingDetail").Select(clause.Associations).Delete(&tallysheet).RowsAffected == 0 {
 		helper.ResponseError(w, http.StatusBadRequest, "Tallysheet Not Found!")
 		return
 	}

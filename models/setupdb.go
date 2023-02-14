@@ -21,7 +21,10 @@ func ConnectDatabase() {
 		logrus.Println("Connection established")
 	}
 
-	db.AutoMigrate(&TallySheet{}, &TallyTable{})
+	//db.AutoMigrate(&TallySheet{}, &TallyTable{},&MarkingDetail{})
+	db.AutoMigrate(&TallySheet{}, &MarkingData{})
+	db.SetupJoinTable(&TallySheet{}, "MarkingData", &MarkingData{})
+	//db.SetupJoinTable(&MarkingData{}, "MarkingDetail", &MarkingDetail{})
 	DB = db
 	logrus.Info("berhasil connect ke database")
 }

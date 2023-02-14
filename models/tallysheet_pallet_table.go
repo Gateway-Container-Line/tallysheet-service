@@ -10,6 +10,45 @@ type TallyTable struct {
 	MeasTallyTable  `gorm:"embeded"`
 }
 
+type DetailedQuantity struct {
+	DetailedQty1  int64 `gorm:"varchar(10)" json:"detailed_qty_1"`
+	DetailedQty2  int64 `gorm:"varchar(10)" json:"detailed_qty_2"`
+	DetailedQty3  int64 `gorm:"varchar(10)" json:"detailed_qty_3"`
+	DetailedQty4  int64 `gorm:"varchar(10)" json:"detailed_qty_4"`
+	DetailedQty5  int64 `gorm:"varchar(10)" json:"detailed_qty_5"`
+	DetailedQty6  int64 `gorm:"varchar(10)" json:"detailed_qty_6"`
+	DetailedQty7  int64 `gorm:"varchar(10)" json:"detailed_qty_7"`
+	DetailedQty8  int64 `gorm:"varchar(10)" json:"detailed_qty_8"`
+	DetailedQty9  int64 `gorm:"varchar(10)" json:"detailed_qty_9"`
+	DetailedQty10 int64 `gorm:"varchar(10)" json:"detailed_qty_10"`
+}
+
+type DetailedPackage struct {
+	DetailedPackage1  string `gorm:"varchar(50)" json:"detailed_package_1"`
+	DetailedPackage2  string `gorm:"varchar(50)" json:"detailed_package_2"`
+	DetailedPackage3  string `gorm:"varchar(50)" json:"detailed_package_3"`
+	DetailedPackage4  string `gorm:"varchar(50)" json:"detailed_package_4"`
+	DetailedPackage5  string `gorm:"varchar(50)" json:"detailed_package_5"`
+	DetailedPackage6  string `gorm:"varchar(50)" json:"detailed_package_6"`
+	DetailedPackage7  string `gorm:"varchar(50)" json:"detailed_package_7"`
+	DetailedPackage8  string `gorm:"varchar(50)" json:"detailed_package_8"`
+	DetailedPackage9  string `gorm:"varchar(50)" json:"detailed_package_9"`
+	DetailedPackage10 string `gorm:"varchar(50)" json:"detailed_package_10"`
+}
+
+type Marking struct {
+	Marking1  string `gorm:"varchar(50)" json:"marking_1"`
+	Marking2  string `gorm:"varchar(50)" json:"marking_2"`
+	Marking3  string `gorm:"varchar(50)" json:"marking_3"`
+	Marking4  string `gorm:"varchar(50)" json:"marking_4"`
+	Marking5  string `gorm:"varchar(50)" json:"marking_5"`
+	Marking6  string `gorm:"varchar(50)" json:"marking_6"`
+	Marking7  string `gorm:"varchar(50)" json:"marking_7"`
+	Marking8  string `gorm:"varchar(50)" json:"marking_8"`
+	Marking9  string `gorm:"varchar(50)" json:"marking_9"`
+	Marking10 string `gorm:"varchar(50)" json:"marking_10"`
+}
+
 type Pallets struct {
 	//row 1
 	PalletCol1Row1 string `gorm:"varchar(5)" json:"pallet_col1row1"`
