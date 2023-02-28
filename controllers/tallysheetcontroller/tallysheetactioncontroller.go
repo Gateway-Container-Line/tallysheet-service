@@ -9,20 +9,28 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
+	"time"
 )
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//mengambil inputan json yang diterima dari frontend
-	var tallyInput models.TallySheet
+	var tallyInput
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tallyInput); err != nil {
 		helper.ResponseError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	formatDate := "2023-01-27"
+	formatedInputDate, _ := time.Parse(formatDate, tallyInput.DateTally)
+
+	tallyInput.DateTally = formatedInputDate
+
 	defer r.Body.Close()
 
+	var tallyModel models.TallySheet
 	//input data ke database penyimpanan
-	if err := models.DB.Create(&tallyInput).Error; err != nil {
+	if err := models.DB.Create(&tallyModel).Error; err != nil {
 		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
