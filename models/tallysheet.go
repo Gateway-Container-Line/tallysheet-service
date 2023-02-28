@@ -14,15 +14,15 @@ type TallySheet struct {
 	BookingConfirmation `gorm:"embedded"`
 	//BookingConfirmation []BookingConfirmation
 
-	//DateTally time.Time `json:"date_tally"`
+	DateTally time.Time `gorm:"date" json:"date_tally"`
 
 	TruckNo string `gorm:"varchar(10)" json:"truck_no"` //no seri truck nya
 
 	PartyTally       string    `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
 	ContainerNo      string    `gorm:"varchar(50)" json:"container_no"`
 	SealNo           string    `gorm:"varchar(50)" json:"seal_no"`
-	Size             string    `gorm:"varchar(30)" json:"size"` //size dari container
-	StuffingPlanDate time.Time `json:"stuffingplan_date"`       //buat date time
+	Size             string    `gorm:"varchar(30)" json:"size"`       //size dari container
+	StuffingPlanDate time.Time `gorm:"date" json:"stuffingplan_date"` //buat date time
 
 	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`  // ada 3 condition true false loaded
 	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
@@ -92,12 +92,6 @@ type OutCondition []struct {
 		KeluarSementara   string `gorm:"varchar(100)" json:"keluar_sementara"`
 	}
 	TotalExitingGoods int16 `gorm:"varchar(30)"`
-}
-
-type inputTallySheet struct {
-	TallySheet       `gorm:"embedded"`
-	DateTally        time.Time `json:"date_tally"`
-	StuffingPlanDate time.Time `json:"stuffingplan_date"`
 }
 
 //func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
