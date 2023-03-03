@@ -8,9 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/utils"
 	"net/http"
-	"time"
 )
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
@@ -22,13 +20,13 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	formatDate := "2006-01-02"
-	formatedInputDateTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.DateTally))
-	formatedInputstuffingTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.StuffingPlanDate))
+	//formatDate := "2006-01-02"
+	//formatedInputDateTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.DateTally))
+	//formatedInputstuffingTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.StuffingPlanDate))
 
 	defer r.Body.Close()
-	tallyInput.DateTally = formatedInputDateTally
-	tallyInput.StuffingPlanDate = formatedInputstuffingTally
+	//tallyInput.DateTally = formatedInputDateTally
+	//tallyInput.StuffingPlanDate = formatedInputstuffingTally
 
 	//input data ke database penyimpanan
 	if err := models.DB.Create(&tallyInput).Error; err != nil {

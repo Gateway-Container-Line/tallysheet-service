@@ -3,10 +3,10 @@ package models
 // Data From BC API
 
 type BookingDetail struct {
-	BookingCode     string `gorm:"unique" json:"booking_code"`
-	DestinationCity string `gorm:"varchar(100)" json:"destination_city"`
-	Vessel          string `gorm:"varchar(50)" json:"vessel"`
-	Voyage          string `gorm:"varchar(50)" json:"voyage"`
+	BookingCode      string `gorm:"unique" json:"booking_code"`
+	DestinationCity  string `gorm:"varchar(100)" json:"destination_city"`
+	Vessel           string `gorm:"varchar(50)" json:"vessel"`
+	ConnectingVessel string `gorm:"varchar(50)" json:"connecting_vessel"`
 }
 
 type GoodsDetail struct {

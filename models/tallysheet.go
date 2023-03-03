@@ -3,7 +3,6 @@ package models
 import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"time"
 )
 
 type TallySheet struct {
@@ -14,24 +13,26 @@ type TallySheet struct {
 	BookingConfirmation `gorm:"embedded"`
 	//BookingConfirmation []BookingConfirmation
 
-	DateTally time.Time `gorm:"date" json:"date_tally"`
+	DateTally string `gorm:"type:datetime" json:"date_tally"`
 
 	TruckNo string `gorm:"varchar(10)" json:"truck_no"` //no seri truck nya
 
-	PartyTally       string    `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
-	ContainerNo      string    `gorm:"varchar(50)" json:"container_no"`
-	SealNo           string    `gorm:"varchar(50)" json:"seal_no"`
-	Size             string    `gorm:"varchar(30)" json:"size"`       //size dari container
-	StuffingPlanDate time.Time `gorm:"date" json:"stuffingplan_date"` //buat date time
+	PartyTally       string `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
+	ContainerNo      string `gorm:"varchar(50)" json:"container_no"`
+	SealNo           string `gorm:"varchar(50)" json:"seal_no"`
+	Size             string `gorm:"varchar(30)" json:"size"`            //size dari container
+	StuffingPlanDate string `gorm:"type:date" json:"stuffingplan_date"` //buat date time
 
 	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`  // ada 3 condition true false loaded
 	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
+	WarehouseName  string `gorm:"varchar(200)" json:"warehouse_name,omitempty"`
 
 	//TallyTableID int
 	//TallyTable   *TallyTable `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	Condition `gorm:"embedded"`
 	//Condition   []Condition
+	TotalItemsWeReceived int16 `gorm:"varchar(5)" json:"total_items_we_received,omitempty"`
 
 	//MarkingData datatypes.JSONType[MarkingData] `json:"marking_data"`
 	//MarkingDataID uint
@@ -64,8 +65,8 @@ type Condition struct {
 }
 
 type InCondition []struct {
-	ArrivalNumber       int8  `json:"arrival_number"`
-	DateTally           int64 `gorm:"autoCreateTime"`
+	ArrivalNumber       int8   `json:"arrival_number"`
+	DateInGoods         string `gorm:"type:datetime" json:"date_in_goods"`
 	DetailedInCondition struct {
 		Good   int16 `gorm:"size:30" json:"good"`
 		Damage int16 `gorm:"size:30" json:"damage"`
@@ -73,13 +74,12 @@ type InCondition []struct {
 		Over   int16 `gorm:"size:30" json:"over"`
 	} `json:"detailed_in_condition"`
 	TotalArrivalGoods int16  `gorm:"varchar(30)" json:"total_arrival_goods"`
-	ArrivalNotes      string `gorm:"varchar(100)" json:"arrival_notes"`
+	ArrivalNotes      string `gorm:"varchar(100)" json:"arrival_notes,omitempty"`
 }
 
 type OutCondition []struct {
-	ExitingNumber        int8           `json:"exiting_number"`
-	DateTally            datatypes.Date `json:"date_tally_out"`
-	TimeTally            datatypes.Time `json:"time_tally_out"`
+	ExitingNumber        int8   `json:"exiting_number"`
+	DateOutGoods         string `gorm:"type:datetime" json:"date_out_goods"`
 	DetailedOutCondition struct {
 		Good   int16 `gorm:"varchar(10)" json:"good"`
 		Damage int16 `gorm:"varchar(30)" json:"damage"`
@@ -89,9 +89,10 @@ type OutCondition []struct {
 	ExitingStatus struct {
 		StatusExit        string `gorm:"varchar(80)" json:"status_exit"`
 		ColoadDestination string `gorm:"varchar(100)" json:"coload_destination,omitempty"`
-		KeluarSementara   string `gorm:"varchar(100)" json:"keluar_sementara"`
-	}
-	TotalExitingGoods int16 `gorm:"varchar(30)"`
+		TemporaryOut      string `gorm:"varchar(100)" json:"temporary_out"`
+	} `json:"exiting_status"`
+	TotalExitingGoods int16  `gorm:"varchar(30)" json:"total_exiting_goods"`
+	ExitingNotes      string `gorm:"varchar(100)" json:"exiting_notes,omitempty"`
 }
 
 //func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
