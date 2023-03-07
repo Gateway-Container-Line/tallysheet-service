@@ -52,7 +52,12 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	//	helper.ResponseJSON(w, http.StatusNotFound, response)
 	//	return
 	//}
+	tallysheet.DateTally = truncateText(tallysheet.DateTally, 16)
 	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+}
+
+func truncateText(s string, max int) string {
+	return s[:max]
 }
 
 func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
