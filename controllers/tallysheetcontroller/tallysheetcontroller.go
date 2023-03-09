@@ -1,12 +1,15 @@
 package tallysheetcontroller
 
 import (
+	"encoding/json"
 	"github.com/Gateway-Container-Line/tallysheet-service/helper"
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"io"
+	"log"
 	"net/http"
 )
 
@@ -52,12 +55,8 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	//	helper.ResponseJSON(w, http.StatusNotFound, response)
 	//	return
 	//}
-	tallysheet.DateTally = truncateText(tallysheet.DateTally, 16)
+	tallysheet.DateTally = helper.truncateText(tallysheet.DateTally, 16)
 	helper.ResponseJSON(w, http.StatusOK, tallysheet)
-}
-
-func truncateText(s string, max int) string {
-	return s[:max]
 }
 
 func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
@@ -79,4 +78,40 @@ func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+}
+
+type OutputRequestQuoteTally struct {
+	data models.TallySheet
+	meta struct {
+		SubmitMethod string
+	}
+}
+
+func requestGETTally(bookingCode string) []byte {
+	logrus.Info("Request Tallysheet API ...")
+	quotation, err := http.Get(`https://gateway-cl.com/api/quotation_gateway?X-API-KEY=gateway-fms&booking_code=${}`)
+	if err != nil {
+		log.Fatal(err)
+		logrus.Error("Tidak bisa mengambil API!")
+	}
+
+	defer quotation.Body.Close()
+
+	quotationData, _ := io.ReadAll(quotation.Body)
+
+	//quotationstring := string(quotationData)
+	//fmt.Println(quotationstring)
+
+	//var quotationObject models.BookingConfirmation
+	//json.Unmarshal(quotationData, &quotationObject)
+	var quotationObject OutputRequestQuoteTally
+	json.Unmarshal(quotationData, &quotationObject)
+	return quotationData
+}
+
+func SearchingInventory(w http.ResponseWriter, r *http.Request) {
+	paramurl := mux.Vars(r)
+	bookingCode := paramurl["booking-code"]
+	logrus.Info("BC : " + bookingCode)
+
 }
