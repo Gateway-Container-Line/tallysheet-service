@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/admincontroller"
-	"github.com/Gateway-Container-Line/tallysheet-service/controllers/bookingconfirmationcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/documentconfirmationcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/tallysheetcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
@@ -71,7 +70,7 @@ func main() {
 
 	//Get Data From BookingCode
 	//r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
-	r.HandleFunc("/api/scan/in/{booking-code}", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
+	//r.HandleFunc("/api/scan/in/{booking-code}", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
 
 	//List all tally
 	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
@@ -112,6 +111,9 @@ func main() {
 
 	//update tally doc export
 	r.HandleFunc("/api/document-export/{booking-code}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
+
+	//CargoInGETQuoteTally
+	r.HandleFunc("/api/scan/in/{booking-code}", tallysheetcontroller.CargoInGETQuoteTally).Methods("GET")
 
 	//Count All Tally
 	r.HandleFunc("/api/count/tally-sheet", admincontroller.CountTallySheet).Methods("GET")
