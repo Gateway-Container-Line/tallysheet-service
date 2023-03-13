@@ -1,5 +1,7 @@
 package models
 
+import "github.com/shopspring/decimal"
+
 type MarkingData struct {
 	//gorm.Model
 	ID      int    `gorm:"primaryKey"`
@@ -44,7 +46,7 @@ type MarkingDetail struct {
 	//MarkingDetail      *string            `gorm:"primaryKey"`
 	WarehousePackage   string             `json:"warehouse_package" gorm:"varchar(30)"`
 	WarehouseQuantity  int                `json:"warehouse_quantity" gorm:"varchar(10)"`
-	WarehouseMeas      int16              `json:"warehouse_meas" gorm:"varchar(30)"`
+	WarehouseMeas      decimal.Decimal    `json:"warehouse_meas" gorm:"type:decimal(18,4);"`
 	WarehouseDimension WarehouseDimension `json:"warehouse_dimension" gorm:"embedded"`
 }
 

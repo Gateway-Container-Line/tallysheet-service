@@ -10,6 +10,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/rs/cors v1.8.2 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/sys v0.0.0-20220927170352-d9d178bc13c6 // indirect
 	gorm.io/datatypes v1.1.0 // indirect

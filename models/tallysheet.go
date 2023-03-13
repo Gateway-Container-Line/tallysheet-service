@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -17,14 +18,14 @@ type TallySheet struct {
 
 	TruckNo string `gorm:"varchar(10)" json:"truck_no"` //no seri truck nya
 
-	PartyTally       string `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
-	ContainerNo      string `gorm:"varchar(50)" json:"container_no"`
-	SealNo           string `gorm:"varchar(50)" json:"seal_no"`
-	Size             string `gorm:"varchar(30)" json:"size"`            //size dari container
-	StuffingPlanDate string `gorm:"type:date" json:"stuffingplan_date"` //buat date time
+	PartyTally       string         `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
+	ContainerNo      string         `gorm:"varchar(50)" json:"container_no"`
+	SealNo           string         `gorm:"varchar(50)" json:"seal_no"`
+	Size             string         `gorm:"varchar(30)" json:"size"`                                    //size dari container
+	StuffingPlanDate sql.NullString `gorm:"type:date;default:null" json:"stuffing_plan_date,omitempty"` //buat date time
 
-	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`  // ada 3 condition true false loaded
-	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation"` //no rak buat
+	RackingStatus  string `gorm:"varchar(5)" json:"racking_status"`            // ada 3 condition true false loaded
+	GodownLocation uint   `gorm:"varchar(10)" json:"godownlocation,omitempty"` //no rak buat
 	WarehouseName  string `gorm:"varchar(200)" json:"warehouse_name,omitempty"`
 
 	//TallyTableID int

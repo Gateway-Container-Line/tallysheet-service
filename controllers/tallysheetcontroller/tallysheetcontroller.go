@@ -8,9 +8,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/utils"
 	"io"
 	"log"
 	"net/http"
+	"runtime"
 )
 
 func TallySheet(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +91,7 @@ type OutputRequestQuoteTally struct {
 	}
 }
 
-func requestGETQuote(result chan<- OutputRequestQuoteTally, bookingCode string) {
+func (OutputRequestQuoteTally) requestGETQuote(bookingCode string) OutputRequestQuoteTally {
 	logrus.Info("Request Quote API ...")
 	quotation, err := http.Get("https://gateway-cl.com/api/quotation_gateway?X-API-KEY=gateway-fms&booking_code=" + bookingCode)
 	if err != nil {
@@ -109,21 +111,19 @@ func requestGETQuote(result chan<- OutputRequestQuoteTally, bookingCode string) 
 	quotationObject.statusCode = quotation.StatusCode
 	quotationObject.meta.SubmitMethod = "POST"
 	quotationObject.error = err
-	result <- quotationObject
+	//result <- quotationObject
 	//error <- err
 	//close(result)
 	//close(statusCode)
 	//close(error)
-	//return quotationData,quotation.StatusCode, err
+	return quotationObject
 }
 
-func requestGETTally(result chan<- OutputRequestQuoteTally, bookingCode string) {
+func (OutputRequestQuoteTally) requestGETTally(bookingCode string) OutputRequestQuoteTally {
 	logrus.Info("Request Tallysheet API ...")
 	tallyRequest, err := http.Get("http://localhost:8081/api/tally-sheet/" + bookingCode)
 	if err != nil {
 		//close(result)
-		//close(statusCode)
-		//close(error)
 		log.Fatal(err)
 		logrus.Error("Tidak bisa mengambil API!")
 	}
@@ -144,9 +144,9 @@ func requestGETTally(result chan<- OutputRequestQuoteTally, bookingCode string) 
 	tallysheetObject.meta.SubmitMethod = "PUT"
 	tallysheetObject.error = err
 	//statusCode <- tallyRequest.StatusCode
-	result <- tallysheetObject
+	//result <- tallysheetObject
 	//error <- err
-	//return tallyData, tallyRequest.StatusCode,err
+	return tallysheetObject
 	//close(result)
 	//close(statusCode)
 	//close(error)
@@ -155,6 +155,8 @@ func requestGETTally(result chan<- OutputRequestQuoteTally, bookingCode string) 
 func CargoInGETQuoteTally(w http.ResponseWriter, r *http.Request) {
 	// Create application context.
 	//ctx, cancel := context.WithCancel(context.Background())
+
+	runtime.GOMAXPROCS(2)
 
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
@@ -165,38 +167,64 @@ func CargoInGETQuoteTally(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Create Channel
-	resultTally := make(chan OutputRequestQuoteTally, 1)
-	resultQuote := make(chan OutputRequestQuoteTally, 1)
+	//resultTally := make(chan OutputRequestQuoteTally)
+	//resultQuote := make(chan OutputRequestQuoteTally)
 	//quotationChanCode := make(chan int)
 	//quotationChanError := make(chan error)
 	//tallysheetChanResult := make(chan []byte)
 	//tallysheetChanCode := make(chan int)
 	//tallysheetChanError := make(chan error)
 
+	Quoteresult := OutputRequestQuoteTally{}.requestGETQuote(bookingCode)
+	tallyresult := OutputRequestQuoteTally{}.requestGETTally(bookingCode)
 	//requestQuote, errQuote := requestGETQuote(ctx, bookingCode)
-	go requestGETTally(resultTally, bookingCode)
-	go requestGETQuote(resultQuote, bookingCode)
+	//go requestGETTally(resultTally, w, bookingCode)
+	//go requestGETQuote(resultQuote, w, bookingCode)
 	//requestTally, errTally := go requestGETTally(ctx, bookingCode)
 
-	var quotationResult = <-resultQuote
-	var tallysheetResult = <-resultTally
+	//var quotationResult = <-resultQuote
+	//var tallysheetResult = <-resultTally
 	//var quotationError = <-quotationChanError
 	//var tallysheetResult = <-tallysheetChanResult
 	//var tallysheetCode = <-tallysheetChanCode
 	//var tallysheetError = <-tallysheetChanError
 
-	if tallysheetResult.statusCode == 200 {
-		helper.ResponseJSON(w, http.StatusOK, tallysheetResult)
-	} else {
-		helper.ResponseJSON(w, http.StatusOK, quotationResult)
+	//if tallysheetResult.statusCode == 200 {
+	//	helper.ResponseJSON(w, http.StatusOK, tallysheetResult)
+	//} else {
+	//	helper.ResponseJSON(w, http.StatusOK, quotationResult)
+	//}
+
+	switch tallyresult.statusCode {
+	case 200:
+		helper.ResponseJSON(w, http.StatusOK, tallyresult)
+	default:
+		switch Quoteresult.statusCode {
+		case 200:
+			helper.ResponseJSON(w, http.StatusOK, Quoteresult)
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, "Error : "+utils.ToString(Quoteresult.error)+"&& Error"+utils.ToString(tallyresult.error))
+		}
 	}
+	//select {
+	//case tallysheetResult := <-resultTally:
+	//	if tallysheetResult.statusCode == 200 {
+	//		helper.ResponseJSON(w, http.StatusOK, tallysheetResult)
+	//	}
+	//case quotationResult := <-resultQuote:
+	//	if quotationResult.statusCode == 200 {
+	//		helper.ResponseJSON(w, http.StatusOK, quotationResult)
+	//	}
+	//default:
+	//	helper.ResponseError(w, http.StatusInternalServerError, "error request")
+	//}
 
 	//logrus.Info(quotationCode)
 	//logrus.Info(quotationError)
 	//logrus.Info(tallysheetError)
 	//
-	close(resultTally)
-	close(resultQuote)
+	//close(resultTally)
+	//close(resultQuote)
 	//close(quotationChanError)
 	//close(tallysheetChanResult)
 	//close(tallysheetChanCode)
