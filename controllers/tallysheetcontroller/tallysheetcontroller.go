@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"runtime"
 )
 
@@ -39,6 +40,7 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
+	bookingCode, _ = url.QueryUnescape(bookingCode)
 	logrus.Info("BC : " + bookingCode)
 
 	var tallysheet models.TallySheet

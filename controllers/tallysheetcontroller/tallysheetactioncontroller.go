@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
+	"net/url"
 )
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +63,7 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
+	bookingCode, _ = url.QueryUnescape(bookingCode)
 
 	//req, _ := http.NewRequest(http.MethodOptions, "http://host.docker.internal:8081/api/tally-sheet/"+bookingCode, nil)
 	//resp, err := http.DefaultClient.Do(req)
