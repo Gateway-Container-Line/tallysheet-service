@@ -20,7 +20,7 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 		helper.ResponseError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	//tallyInput.ItemsReceived = RecurrentItemsReceived(tallyInput.InCondition)
 	//formatDate := "2006-01-02"
 	//formatedInputDateTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.DateTally))
 	//formatedInputstuffingTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.StuffingPlanDate))
@@ -51,6 +51,16 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//}
 	logrus.Info("Success Create Tallysheet")
 }
+
+//func RecurrentItemsReceived(inCondition datatypes.JSONType[models.InCondition]) int16 {
+//	var sumResult int16 = 0
+//	byteCondition = []byte{inCondition}
+//	arrivalCondition := json.Unmarshal([]byte{inCondition}, &models.InCondition{})
+//	for _, element := range inCondition {
+//		sumResult += element.TotalArrivalGoods
+//	}
+//	return sumResult
+//}
 
 func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	//if r.Method == "OPTIONS" {
