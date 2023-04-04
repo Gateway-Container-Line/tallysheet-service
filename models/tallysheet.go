@@ -33,8 +33,11 @@ type TallySheet struct {
 
 	Condition `gorm:"embedded"`
 	//Condition   []Condition
-	ItemsReceived int16  `gorm:"size:5" json:"items_received,omitempty"`
-	Remark        string `gorm:"varchar(230)" json:"remark,omitempty"`
+	ItemsReceived int16 `gorm:"size:5" json:"items_received,omitempty"`
+	//ItemsInRack   int   `gorm:"size:10" json:"items_in_rack"`
+	ItemsNotInRack int `gorm:"size:5" json:"items_not_in_rack,omitempty"`
+
+	Remark string `gorm:"varchar(230)" json:"remark,omitempty"`
 	//MarkingData datatypes.JSONType[MarkingData] `json:"marking_data"`
 	//MarkingDataID uint
 	//MarkingData   []MarkingData `json:"marking_data,omitempty"`
