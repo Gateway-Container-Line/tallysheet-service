@@ -24,6 +24,8 @@ type TallySheet struct {
 	Size             string         `gorm:"varchar(30)" json:"size"`                                    //size dari container
 	StuffingPlanDate sql.NullString `gorm:"type:date;default:null" json:"stuffing_plan_date,omitempty"` //buat date time
 
+	ETD string `gorm:"type:date" json:"etd"`
+
 	RackID         string `gorm:"size:100" json:"rack_id,omitempty"`
 	RackingStatus  string `gorm:"varchar(5)" json:"racking_status,omitempty"` // ada 3 condition true false loaded
 	GodownLocation string `gorm:"varchar(100)" json:"godownlocation"`         //no rak buat
@@ -33,9 +35,9 @@ type TallySheet struct {
 
 	Condition `gorm:"embedded"`
 	//Condition   []Condition
-	ItemsReceived int16 `gorm:"size:5" json:"items_received,omitempty"`
+	ItemsReceived int16 `gorm:"size:8" json:"items_received,omitempty"`
 	//ItemsInRack   int   `gorm:"size:10" json:"items_in_rack"`
-	ItemsNotInRack int `gorm:"size:5" json:"items_not_in_rack,omitempty"`
+	//ItemsNotInRack int `gorm:"size:5" json:"items_not_in_rack,omitempty"`
 
 	Remark string `gorm:"varchar(230)" json:"remark,omitempty"`
 	//MarkingData datatypes.JSONType[MarkingData] `json:"marking_data"`

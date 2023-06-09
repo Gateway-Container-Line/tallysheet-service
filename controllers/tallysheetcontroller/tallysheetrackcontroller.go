@@ -36,6 +36,32 @@ func QuantityTally(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type TallyNotInRackOutput struct {
+	Error                     bool
+	MarundaListTallyNotInRack []models.TallySheet `json:"marunda_list_tally_not_in_rack"`
+}
+
+func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("GET List Tally not in rack")
+	var tallysheet []models.TallySheet
+	if err := models.DB.Where("racking_status = 'false'").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	//if models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tidak ada tally sheet"}
+	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+	//	return
+	//}
+	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+}
+
 //func UpdateGodownLocation(w http.ResponseWriter, r *http.Request) {
 //	paramurl := mux.Vars(r)
 //	bookingCode := paramurl["booking-code"]

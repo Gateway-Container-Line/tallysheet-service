@@ -52,6 +52,60 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("Success Create Tallysheet")
 }
 
+func TallyUpsert(w http.ResponseWriter, r *http.Request) {
+	//mengambil inputan json yang diterima dari frontend
+	paramurl := mux.Vars(r)
+	bookingCode := paramurl["booking-code"]
+	bookingCode, _ = url.QueryUnescape(bookingCode)
+
+	var tallyInput models.TallySheet
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&tallyInput); err != nil {
+		helper.ResponseError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	//tallyInput.ItemsReceived = RecurrentItemsReceived(tallyInput.InCondition)
+	//formatDate := "2006-01-02"
+	//formatedInputDateTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.DateTally))
+	//formatedInputstuffingTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.StuffingPlanDate))
+
+	defer r.Body.Close()
+	//tallyInput.DateTally = formatedInputDateTally
+	//tallyInput.StuffingPlanDate = formatedInputstuffingTally
+
+	var queryexec string
+	//input data ke database penyimpanan
+	//upsert
+	if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallyInput).RowsAffected == 0 {
+		if err := models.DB.Create(&tallyInput).Error; err != nil {
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		queryexec = "Create"
+	}
+	if queryexec == "Create" {
+		queryexec = "Create"
+	} else {
+		queryexec = "Update"
+	}
+
+	logrus.Info("Success Input to Database")
+	//updatestatus, err := http.NewRequest(http.MethodPut, "https://gateway-cl.com/api/update_cargo_status")
+
+	response := map[string]string{"message": "Success " + queryexec + " Tallysheet"}
+	helper.ResponseJSON(w, http.StatusOK, response)
+
+	// input id tally to db redis
+	//RDB := models.NewRedisClient(0)
+	//ttl := time.Duration(24) * time.Hour
+	//set2db := RDB.Set(context.Background(), "id_tally", tallyInput.IdTally, ttl)
+	//if err := set2db.Err(); err != nil {
+	//	logrus.Error("Unable To Set Data to Redis.", err)
+	//	return
+	//}
+	logrus.Info("Success Create Tallysheet")
+}
+
 //func RecurrentItemsReceived(inCondition datatypes.JSONType[models.InCondition]) int16 {
 //	var sumResult int16 = 0
 //	byteCondition = []byte{inCondition}
