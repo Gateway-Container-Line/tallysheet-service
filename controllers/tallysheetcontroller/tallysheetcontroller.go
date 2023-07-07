@@ -21,10 +21,12 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 	if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			response := map[string]any{"error": true, "message": "There is no Tallysheet! :("}
+			helper.ResponseError(w, http.StatusNotFound, response)
 			return
 		default:
-			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			response := map[string]any{"error": true, "message": err.Error()}
+			helper.ResponseError(w, http.StatusInternalServerError, response)
 			return
 		}
 	}
@@ -47,7 +49,8 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	if err := models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			response := map[string]any{"error": true, "message": "Tallysheet Not Found! :("}
+			helper.ResponseError(w, http.StatusNotFound, response)
 			return
 		default:
 			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
@@ -59,6 +62,8 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	//	helper.ResponseJSON(w, http.StatusNotFound, response)
 	//	return
 	//}
+	tallysheet.Error = false
+	tallysheet.ETD = helper.TruncateDateText(tallysheet.ETD, 10)
 	tallysheet.DateTally = helper.TruncateDateText(tallysheet.DateTally, 16)
 	helper.ResponseJSON(w, http.StatusOK, tallysheet)
 }

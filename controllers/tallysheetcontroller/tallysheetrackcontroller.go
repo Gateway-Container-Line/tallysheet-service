@@ -1,6 +1,7 @@
 package tallysheetcontroller
 
 import (
+	"context"
 	"github.com/Gateway-Container-Line/tallysheet-service/helper"
 	"github.com/Gateway-Container-Line/tallysheet-service/models"
 	"github.com/gorilla/mux"
@@ -36,30 +37,60 @@ func QuantityTally(w http.ResponseWriter, r *http.Request) {
 
 }
 
-type TallyNotInRackOutput struct {
-	Error                     bool
-	MarundaListTallyNotInRack []models.TallySheet `json:"marunda_list_tally_not_in_rack"`
+//type TallyNotInRackOutput struct {
+//	Error                     bool
+//	MarundaListTallyNotInRack []models.TallySheet `json:"marunda_list_tally_not_in_rack"`
+//}
+
+type CargoNotInRackOutput struct {
+	gorm.Model
+	BookingCode     string
+	ShipperName     string
+	DestinationCity string `json:"Destination"`
+	ETD             string
+	Quantity        int64
+	ItemsReceived   int64
+	PackageType     string
+	RackingStatus   string `json:"RackStatus"`
+	ItemsInRack     *int   `json:"ItemInRack"`
 }
+
+//func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
+//logrus.Info("GET List Tally not in rack")
+//var tallysheet []models.TallySheet
+//if err := models.DB.Where("racking_status = 'false'").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+//	switch err {
+//	case gorm.ErrRecordNotFound:
+//		helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+//		return
+//	default:
+//		helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+//		return
+//	}
+//}
+//if models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
+//	response := map[string]string{"message": "Tidak ada tally sheet"}
+//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+//	return
+//}
+//helper.ResponseJSON(w, http.StatusOK, tallysheet)
+//}
 
 func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("GET List Tally not in rack")
-	var tallysheet []models.TallySheet
-	if err := models.DB.Where("racking_status = 'false'").Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+	var tallysheet models.TallySheet
+	var Output []CargoNotInRackOutput
+	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			helper.ResponseError(w, http.StatusNotFound, "Tallysheet Not Found")
+			helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
 			return
 		default:
 			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
-	//if models.DB.Where("godown_location = ''").Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
-	//	response := map[string]string{"message": "Tidak ada tally sheet"}
-	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
-	//	return
-	//}
-	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+	helper.ResponseJSON(w, http.StatusOK, Output)
 }
 
 //func UpdateGodownLocation(w http.ResponseWriter, r *http.Request) {

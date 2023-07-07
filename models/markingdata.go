@@ -24,26 +24,10 @@ type MarkingData struct {
 	//MarkingDetail   []*MarkingDetail `json:"marking_detail,omitempty" gorm:"foreignKey:DetailID;references:MarkingDetailID;association_foreignKey:DetailID"`
 	//MarkingDetail []*MarkingDetail `json:"marking_detail,omitempty" gorm:"many2many:MarkingData_MarkingDetail;foreignKey:Marking;joinForeignKey:MarkingDetailID;References:DetailID;joinReferences:MarkingDetail"`
 	//foreignKey:Refer;joinForeignKey:UserReferID;References:UserRefer;joinReferences:ProfileRefer"`
-	//  Refer    uint      `gorm:"index:,unique"`
-	//Marking string `json:"marking" gorm:"varchar(150)"`
-	//MarkingDetail []struct {
-	//	WarehousePackage   string           `json:"warehouse_package" gorm:"varchar(30)"`
-	//	WarehouseQuantity  int              `json:"warehouse_quantity" gorm:"varchar(10)"`
-	//	WarehouseMeas      int16            `json:"warehouse_meas" gorm:"varchar(30)"`
-	//	WarehouseDimension map[string]int16 `json:"warehouse_dimension"`
-	//	//WarehouseDimension struct {
-	//		Width  int `json:"warehouse_dimension_width" gorm:"varchar(30)"`
-	//		Height int `json:"warehouse_dimension_height" gorm:"varchar(30)"`
-	//		Length int `json:"warehouse_dimension_length" gorm:"varchar(30)"`
-	//	//} `json:"warehouse_dimension"`
-	//} `json:"marking_detail,omitempty"`
+	//  Refer    uint      `gorm:"index:,unique"
 }
 
 type MarkingDetail struct {
-	//ID            uint `gorm:"primaryKey"`
-	//IdMarkingData uint
-	//gorm.Model
-	//MarkingDetail      *string            `gorm:"primaryKey"`
 	WarehousePackage   string             `json:"warehouse_package" gorm:"varchar(30)"`
 	WarehouseQuantity  int                `json:"warehouse_quantity" gorm:"varchar(10)"`
 	WarehouseMeas      decimal.Decimal    `json:"warehouse_meas" gorm:"type:decimal(18,4);"`
