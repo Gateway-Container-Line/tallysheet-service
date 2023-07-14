@@ -60,12 +60,12 @@ type Condition struct {
 	//InCondition  `gorm:"embeded"`
 	//OutCondition `gorm:"embeded"`
 
-	InCondition  datatypes.JSONType[InCondition]  `json:"in_condition,omitempty"`
+	InCondition datatypes.JSONType[InCondition] `json:"in_condition,omitempty"`
+	//OutCondition []*OutCondition                `json:"out_condition,omitempty"`
 	OutCondition datatypes.JSONType[OutCondition] `json:"out_condition,omitempty"`
 
 	//alasan dari kondisi yang ada
 	//null jika tidak ada masalah
-	AlasanCondition string `gorm:"varchar(50)" json:"alasan_condition,omitempty"`
 
 	//keterangan mengenai surat jalan dan doc eksport
 	SignSuratJalan     string `gorm:"varchar(50)" json:"sign_surat_jalan"`
@@ -81,18 +81,17 @@ type InCondition []struct {
 		Short  int16 `gorm:"size:30" json:"short"`
 		Over   int16 `gorm:"size:30" json:"over"`
 	} `json:"detailed_in_condition"`
-	TotalArrivalGoods int16  `gorm:"varchar(30)" json:"total_arrival_goods"`
+	TotalArrivalGoods int16  `gorm:"size:30" json:"total_arrival_goods"`
 	ArrivalNotes      string `gorm:"varchar(100)" json:"arrival_notes,omitempty"`
 }
 
 type OutCondition []struct {
-	ExitingNumber int8   `json:"exiting_number"`
-	DateOutGoods  string `gorm:"type:datetime" json:"date_out_goods"`
-	ExitingStatus struct {
-		StatusExit        string `gorm:"varchar(80)" json:"status_exit"`
-		ColoadDestination string `gorm:"varchar(100)" json:"coload_destination,omitempty"`
-		//TemporaryOut      string `gorm:"varchar(100)" json:"temporary_out"`
-	} `json:"exiting_status"`
+	ExitingNumber  int8   `json:"exiting_number"`
+	DateOutGoods   string `gorm:"type:datetime" json:"date_out_goods"`
+	ExitingTruckNo string `gorm:"varchar(10)" json:"exiting_truck_no"`
+	//StatusExit        string `gorm:"varchar(80)" json:"status_exit"`
+	ExitType          string `gorm:"type:enum('Coload','CargoAllOut','CargoPartialOut')" json:"exit_type"`
+	ColoadDestination string `gorm:"varchar(100)" json:"coload_destination,omitempty"`
 	TotalExitingGoods int16  `gorm:"size:30" json:"total_exiting_goods"`
 	ExitingNotes      string `gorm:"varchar(100)" json:"exiting_notes,omitempty"`
 }
@@ -120,7 +119,7 @@ func (tallysheet *TallySheet) BeforeCreate(tx *gorm.DB) (err error) {
 	if tallysheet.ItemsReceived == tallysheet.Quantity {
 		//tallysheet.StatusTally = "Cargo In"
 		var damagedValue int16
-		for _, value := range tallysheet.InCondition.Data {
+		for _, value := range tallysheet.InCondition.Data() {
 			damagedValue += value.DetailedInCondition.Damage
 		}
 		if damagedValue > 0 {
@@ -137,21 +136,43 @@ func (tallysheet *TallySheet) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
-	if tallysheet.ItemsReceived == tallysheet.Quantity {
-		//tallysheet.StatusTally = "Cargo In"
-		var damagedValue int16
-		for _, value := range tallysheet.InCondition.Data {
-			damagedValue += value.DetailedInCondition.Damage
+	var ts TallySheet
+	DB.Model(&ts).Where("booking_code = ?", tallysheet.BookingCode).Find(&ts)
+
+	lengthInCon := len(tallysheet.InCondition.Data())
+	if len(ts.InCondition.Data()) < lengthInCon {
+		if tallysheet.ItemsReceived == tallysheet.Quantity {
+			//tallysheet.StatusTally = "Cargo In"
+			var damagedValue int16
+			for _, value := range tallysheet.InCondition.Data() {
+				damagedValue += value.DetailedInCondition.Damage
+			}
+			if damagedValue > 0 {
+				tallysheet.StatusTally = "Damaged"
+			} else if damagedValue == 0 {
+				tallysheet.StatusTally = "Cargo In"
+			}
+		} else if tallysheet.ItemsReceived > tallysheet.Quantity {
+			tallysheet.StatusTally = "Over"
+		} else if tallysheet.ItemsReceived < tallysheet.Quantity {
+			tallysheet.StatusTally = "Short"
 		}
-		if damagedValue > 0 {
-			tallysheet.StatusTally = "Damaged"
-		} else {
-			tallysheet.StatusTally = "Cargo In"
+	} else {
+		outcon := tallysheet.OutCondition.Data()
+		lengthOutCon := len(tallysheet.OutCondition.Data())
+		if lengthOutCon > 0 {
+			if outcon[lengthOutCon-1].ExitType == "Coload" {
+				tallysheet.ItemsReceived = 0
+				tallysheet.StatusTally = "Coload"
+			} else if outcon[lengthOutCon-1].ExitType == "CargoPartialOut" {
+				tallysheet.ItemsReceived = tallysheet.ItemsReceived - outcon[lengthOutCon-1].TotalExitingGoods
+				tallysheet.StatusTally = "Temporary Out"
+			} else if outcon[lengthOutCon-1].ExitType == "CargoAllOut" {
+				tallysheet.ItemsReceived = 0
+				tallysheet.StatusTally = "Cancel"
+			}
 		}
-	} else if tallysheet.ItemsReceived > tallysheet.Quantity {
-		tallysheet.StatusTally = "Over"
-	} else if tallysheet.ItemsReceived < tallysheet.Quantity {
-		tallysheet.StatusTally = "Short"
 	}
+
 	return nil
 }
