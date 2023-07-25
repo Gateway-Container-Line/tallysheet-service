@@ -26,8 +26,6 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//formatedInputstuffingTally, _ := time.Parse(formatDate, utils.ToString(tallyInput.StuffingPlanDate))
 
 	defer r.Body.Close()
-	//tallyInput.DateTally = formatedInputDateTally
-	//tallyInput.StuffingPlanDate = formatedInputstuffingTally
 
 	//input data ke database penyimpanan
 	if err := models.DB.Create(&tallyInput).Error; err != nil {

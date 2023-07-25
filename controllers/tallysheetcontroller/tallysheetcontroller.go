@@ -16,6 +16,15 @@ import (
 	"runtime"
 )
 
+// AllTallySheetOutput Output for get All Tallysheet data
+type AllTallySheetOutput struct {
+	//Code          int
+	Error         bool                `json:",omitempty"`
+	InventoryData []models.TallySheet `json:"inventory_data"`
+	MetaData      struct{}            `json:"meta_data,omitempty"`
+}
+
+// TallySheet Search All tallysheet
 func TallySheet(w http.ResponseWriter, r *http.Request) {
 	var tallysheet []models.TallySheet
 	if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
@@ -30,12 +39,18 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//if models.DB.Preload(clause.Associations).Find(&tallysheet).RowsAffected == 0 {
-	//	response := map[string]string{"message": "Tidak ada tally sheet"}
-	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
-	//	return
-	//}
-	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+
+	var TSOutput AllTallySheetOutput
+	//TSOutput.Code = http.StatusOK
+	TSOutput.Error = false
+	TSOutput.InventoryData = tallysheet
+	helper.ResponseJSON(w, http.StatusOK, TSOutput)
+}
+
+type TallySheetOutput struct {
+	Error          bool              `json:",omitempty"`
+	TallysheetData models.TallySheet `json:"tallysheet_data"`
+	MetaData       struct{}          `json:"meta_data,omitempty"`
 }
 
 func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
@@ -62,10 +77,13 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	//	helper.ResponseJSON(w, http.StatusNotFound, response)
 	//	return
 	//}
-	tallysheet.Error = false
+	//tallysheet.Error = false
 	tallysheet.ETD = helper.TruncateDateText(tallysheet.ETD, 10)
 	tallysheet.DateTally = helper.TruncateDateText(tallysheet.DateTally, 16)
-	helper.ResponseJSON(w, http.StatusOK, tallysheet)
+	var TSOutput TallySheetOutput
+	TSOutput.Error = false
+	TSOutput.TallysheetData = tallysheet
+	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
 type OutputRequestQuoteTally struct {

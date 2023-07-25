@@ -5,9 +5,10 @@ import (
 	"gorm.io/gorm"
 )
 
-// TallySheet Note For Upgrade Version Before Migrate to Microservice : please make every data group like data tally, racking data, marking data, etc
+// TallySheet model for tallysheet
+// Note For Upgrade Version Before Migrate to Microservice : please make every data group like data tally, racking data, marking data, etc
 type TallySheet struct {
-	Meta `gorm:"embedded"`
+	//Meta `gorm:"embedded"`
 	gorm.Model
 	// index
 
@@ -15,9 +16,9 @@ type TallySheet struct {
 	BookingConfirmation `gorm:"embedded"`
 	//BookingConfirmation []BookingConfirmation
 
-	DateTally string `gorm:"type:datetime" json:"date_tally"`
+	DateTally string `gorm:"type:datetime" json:"date_tally,omitempty"`
 
-	TruckNo string `gorm:"varchar(10)" json:"truck_no"` //no seri truck nya
+	//TruckNo string `gorm:"varchar(10)" json:"truck_no"` //no seri truck nya
 
 	PartyTally       string `gorm:"varchar(20)" json:"party_tally"` // quantity + packing
 	ContainerNo      string `gorm:"varchar(50)" json:"container_no"`
@@ -57,19 +58,38 @@ type TallySheet struct {
 }
 
 type Condition struct {
-	//InCondition  `gorm:"embeded"`
-	//OutCondition `gorm:"embeded"`
-
-	InCondition datatypes.JSONType[InCondition] `json:"in_condition,omitempty"`
+	CargoInOutHistory datatypes.JSONType[CargoInOutData] `json:"cargo_in_out_history,omitempty"`
+	//InCondition       datatypes.JSONType[InCondition]    `json:"in_condition,omitempty"`
 	//OutCondition []*OutCondition                `json:"out_condition,omitempty"`
-	OutCondition datatypes.JSONType[OutCondition] `json:"out_condition,omitempty"`
-
-	//alasan dari kondisi yang ada
-	//null jika tidak ada masalah
+	//OutCondition datatypes.JSONType[OutCondition] `json:"out_condition,omitempty"`
 
 	//keterangan mengenai surat jalan dan doc eksport
 	SignSuratJalan     string `gorm:"varchar(50)" json:"sign_surat_jalan"`
 	SignDocumentExport string `gorm:"varchar(50)" json:"sign_document_export"`
+}
+
+type CargoInOutData []struct {
+	InOutNumber int8   `json:"in_out_number"`
+	InOutDate   string `gorm:"type:datetime" json:"in_out_date"`
+	InOutType   string `gorm:"type:enum('ArrivalData','ExitingData')" json:"in_out_type"`
+	TruckNo     string `gorm:"varchar(10)" json:"truck_no"`
+	ArrivalData *struct {
+		ArrivalType         string `json:"arrival_type"`
+		DetailedArrivalData struct {
+			Good   int16 `gorm:"size:30" json:"good"`
+			Damage int16 `gorm:"size:30" json:"damage"`
+			Short  int16 `gorm:"size:30" json:"short"`
+			Over   int16 `gorm:"size:30" json:"over"`
+		} `json:"detailed_arrival_data"`
+		//ArrivalNotes string `gorm:"size:100;default:null" json:"arrival_notes,omitempty"`
+	} `json:"arrival_data,omitempty"`
+	ExitingData *struct {
+		ExitType          string  `gorm:"type:enum('Coload','CargoAllOut','CargoPartialOut')" json:"exit_type"`
+		ColoadDestination *string `gorm:"varchar(100)" json:"coload_destination,omitempty"`
+		//ExitingNotes      string  `gorm:"size:100" json:"exiting_notes"`
+	} `json:"exiting_data,omitempty"`
+	InOutNotes         string `gorm:"size:100;default:null" json:"in_out_notes,omitempty"`
+	TotalInOutQuantity int16  `gorm:"size:30" json:"total_in_out_quantity"`
 }
 
 type InCondition []struct {
@@ -115,64 +135,65 @@ type Meta struct {
 //}
 //
 
-func (tallysheet *TallySheet) BeforeCreate(tx *gorm.DB) (err error) {
-	if tallysheet.ItemsReceived == tallysheet.Quantity {
-		//tallysheet.StatusTally = "Cargo In"
-		var damagedValue int16
-		for _, value := range tallysheet.InCondition.Data() {
-			damagedValue += value.DetailedInCondition.Damage
-		}
-		if damagedValue > 0 {
-			tallysheet.StatusTally = "Damaged"
-		} else {
-			tallysheet.StatusTally = "Cargo In"
-		}
-	} else if tallysheet.ItemsReceived > tallysheet.Quantity {
-		tallysheet.StatusTally = "Over"
-	} else if tallysheet.ItemsReceived < tallysheet.Quantity {
-		tallysheet.StatusTally = "Short"
-	}
-	return nil
-}
+//func (tallysheet *TallySheet) BeforeCreate(tx *gorm.DB) (err error) {
+//	if tallysheet.ItemsReceived == tallysheet.Quantity {
+//		//tallysheet.StatusTally = "Cargo In"
+//		var damagedValue int16
+//		for _, value := range tallysheet.InCondition.Data() {
+//			damagedValue += value.DetailedInCondition.Damage
+//		}
+//		if damagedValue > 0 {
+//			tallysheet.StatusTally = "Damaged"
+//		} else {
+//			tallysheet.StatusTally = "Cargo In"
+//		}
+//	} else if tallysheet.ItemsReceived > tallysheet.Quantity {
+//		tallysheet.StatusTally = "Over"
+//	} else if tallysheet.ItemsReceived < tallysheet.Quantity {
+//		tallysheet.StatusTally = "Short"
+//	}
+//	return nil
+//}
 
-func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
-	var ts TallySheet
-	DB.Model(&ts).Where("booking_code = ?", tallysheet.BookingCode).Find(&ts)
-
-	lengthInCon := len(tallysheet.InCondition.Data())
-	if len(ts.InCondition.Data()) < lengthInCon {
-		if tallysheet.ItemsReceived == tallysheet.Quantity {
-			//tallysheet.StatusTally = "Cargo In"
-			var damagedValue int16
-			for _, value := range tallysheet.InCondition.Data() {
-				damagedValue += value.DetailedInCondition.Damage
-			}
-			if damagedValue > 0 {
-				tallysheet.StatusTally = "Damaged"
-			} else if damagedValue == 0 {
-				tallysheet.StatusTally = "Cargo In"
-			}
-		} else if tallysheet.ItemsReceived > tallysheet.Quantity {
-			tallysheet.StatusTally = "Over"
-		} else if tallysheet.ItemsReceived < tallysheet.Quantity {
-			tallysheet.StatusTally = "Short"
-		}
-	} else {
-		outcon := tallysheet.OutCondition.Data()
-		lengthOutCon := len(tallysheet.OutCondition.Data())
-		if lengthOutCon > 0 {
-			if outcon[lengthOutCon-1].ExitType == "Coload" {
-				tallysheet.ItemsReceived = 0
-				tallysheet.StatusTally = "Coload"
-			} else if outcon[lengthOutCon-1].ExitType == "CargoPartialOut" {
-				tallysheet.ItemsReceived = tallysheet.ItemsReceived - outcon[lengthOutCon-1].TotalExitingGoods
-				tallysheet.StatusTally = "Temporary Out"
-			} else if outcon[lengthOutCon-1].ExitType == "CargoAllOut" {
-				tallysheet.ItemsReceived = 0
-				tallysheet.StatusTally = "Cancel"
-			}
-		}
-	}
-
-	return nil
-}
+//func (tallysheet *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
+//	var ts TallySheet
+//	DB.Model(&ts).Where("booking_code = ?", tallysheet.BookingCode).Find(&ts)
+//
+//	lengthInCon := len(tallysheet.InCondition.Data())
+//	if len(ts.InCondition.Data()) < lengthInCon {
+//		if tallysheet.ItemsReceived == tallysheet.Quantity {
+//			//tallysheet.StatusTally = "Cargo In"
+//			var damagedValue int16
+//			for _, value := range tallysheet.InCondition.Data() {
+//				damagedValue += value.DetailedInCondition.Damage
+//			}
+//			if damagedValue > 0 {
+//				tallysheet.StatusTally = "Damaged"
+//			} else if damagedValue == 0 {
+//				tallysheet.StatusTally = "Cargo In"
+//			}
+//		} else if tallysheet.ItemsReceived > tallysheet.Quantity {
+//			tallysheet.StatusTally = "Over"
+//		} else if tallysheet.ItemsReceived < tallysheet.Quantity {
+//			tallysheet.StatusTally = "Short"
+//		}
+//
+//	} else {
+//		outcon := tallysheet.OutCondition.Data()
+//		lengthOutCon := len(tallysheet.OutCondition.Data())
+//		if lengthOutCon > 0 {
+//			if outcon[lengthOutCon-1].ExitType == "Coload" {
+//				tallysheet.ItemsReceived = 0
+//				tallysheet.StatusTally = "Coload"
+//			} else if outcon[lengthOutCon-1].ExitType == "CargoPartialOut" {
+//				tallysheet.ItemsReceived = tallysheet.ItemsReceived - outcon[lengthOutCon-1].TotalExitingGoods
+//				tallysheet.StatusTally = "Temporary Out"
+//			} else if outcon[lengthOutCon-1].ExitType == "CargoAllOut" {
+//				tallysheet.ItemsReceived = 0
+//				tallysheet.StatusTally = "Cancel"
+//			}
+//		}
+//	}
+//
+//	return nil
+//}

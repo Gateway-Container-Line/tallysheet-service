@@ -113,7 +113,7 @@ func main() {
 	r.HandleFunc("/api/document-export/{booking-code}", documentconfirmationcontroller.ConfirmationDocumentExport).Methods("PUT")
 
 	//CargoInGETQuoteTally
-	r.HandleFunc("/api/scan/in/{booking-code}", tallysheetcontroller.CargoInGETQuoteTally).Methods("GET")
+	//r.HandleFunc("/api/scan/in/{booking-code}", tallysheetcontroller.CargoInGETQuoteTally).Methods("GET")
 
 	//Count All Tally
 	r.HandleFunc("/api/count/tally-sheet", admincontroller.CountTallySheet).Methods("GET")
