@@ -197,3 +197,42 @@ type Meta struct {
 //
 //	return nil
 //}
+
+func (ts *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
+	InOutData := ts.CargoInOutHistory.Data()
+	if len(InOutData) > 0 {
+		var totalItemReceived int16
+		var totalDamagedItems int16
+		for _, value := range ts.CargoInOutHistory.Data() {
+			if value.InOutType == "ArrivalData" {
+				totalItemReceived += value.TotalInOutQuantity
+				totalDamagedItems += value.ArrivalData.DetailedArrivalData.Damage
+			} else if value.InOutType == "ExitingData" {
+				totalItemReceived -= value.TotalInOutQuantity
+			}
+		}
+
+		if InOutData[len(InOutData)-1].InOutType == "ExitingData" {
+			if InOutData[len(InOutData)-1].ExitingData.ExitType == "Stuffing" {
+				ts.StatusTally = "Stuffing"
+			} else if InOutData[len(InOutData)-1].ExitingData.ExitType == "Coload" {
+				ts.StatusTally = "Coload"
+			} else if InOutData[len(InOutData)-1].ExitingData.ExitType == "CargoAllOut" {
+				ts.StatusTally = "Canceled"
+			}
+		} else {
+			if totalItemReceived == ts.Quantity {
+				if totalDamagedItems > 0 {
+					ts.StatusTally = "Damaged"
+				} else if totalDamagedItems == 0 {
+					ts.StatusTally = "CargoIn"
+				}
+			} else if totalItemReceived < ts.Quantity {
+				ts.StatusTally = "Short"
+			} else if totalItemReceived > ts.Quantity {
+				ts.StatusTally = "Over"
+			}
+		}
+	}
+	return nil
+}
