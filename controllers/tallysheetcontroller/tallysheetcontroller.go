@@ -19,7 +19,7 @@ import (
 // AllTallySheetOutput Output for get All Tallysheet data
 type AllTallySheetOutput struct {
 	//Code          int
-	Error         bool                `json:",omitempty"`
+	Error         bool                `json:"error,omitempty"`
 	InventoryData []models.TallySheet `json:"inventory_data"`
 	MetaData      struct{}            `json:"meta_data,omitempty"`
 }
@@ -48,7 +48,7 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 }
 
 type TallySheetOutput struct {
-	Error          bool              `json:",omitempty"`
+	Error          bool              `json:"error,omitempty"`
 	TallysheetData models.TallySheet `json:"tallysheet_data"`
 	MetaData       struct{}          `json:"meta_data,omitempty"`
 }

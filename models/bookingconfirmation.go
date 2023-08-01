@@ -16,7 +16,8 @@ type GoodsDetail struct {
 	Volume      string `gorm:"varchar(10)" json:"volume"` //meas
 	Weight      string `gorm:"varchar(10)" json:"weight"`
 	//Marking            string  `gorm:"varchar(150)" json:"marking"`
-	DescriptionOfGoods string `gorm:"varchar(500)" json:"description_of_goods"`
+	DescriptionOfGoods string `gorm:"size:800" json:"description_of_goods"`
+	DescriptionPrint   string `gorm:"size:200" json:"description_print"`
 }
 
 type BookingConfirmation struct {
