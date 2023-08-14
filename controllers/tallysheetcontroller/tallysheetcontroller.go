@@ -14,20 +14,63 @@ import (
 	"net/http"
 	"net/url"
 	"runtime"
+	"strconv"
 )
 
 // AllTallySheetOutput Output for get All Tallysheet data
 type AllTallySheetOutput struct {
 	//Code          int
 	Error         bool                `json:"error,omitempty"`
+	Message       string              `json:"message,omitempty"`
 	InventoryData []models.TallySheet `json:"inventory_data"`
-	MetaData      struct{}            `json:"meta_data,omitempty"`
+	MetaData      models.MetaData     `json:"meta_data,omitempty"`
+}
+
+func paginate(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		query := r.URL.Query()
+		page, _ := strconv.Atoi(query.Get("page"))
+		if page <= 0 {
+			page = 1
+		}
+
+		limit, _ := strconv.Atoi(query.Get("limit"))
+		switch {
+		case limit > 100:
+			limit = 100
+		case limit <= 0:
+			limit = 10
+		}
+
+		offset := (page - 1) * limit
+
+		return db.Offset(offset).Limit(limit)
+	}
+}
+
+func searching(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		query := r.URL.Query()
+		search := query.Get("search")
+		if search == "" {
+			return db
+		} else {
+			//return db.Where("* Like %", search)
+			//db.Where("booking_code LIKE %?%", search).Or("destination_city LIKE %?%", search).Or("vessel LIKE %?% ", search).
+			//	Or("shipper_name LIKE %?%", search).Or("package_type LIKE %?% ", search).Or("quantity LIKE %?%", search).
+			//	Or("description_of_goods LIKE %?% ", search).Or("date_tally LIKE %?%", search).Or("party_tally LIKE %?%", search).Or("marking LIKE %?% ", search)
+			return db.Joins("LEFT JOIN marking_data ON tally_sheets.booking_code = marking_data.bc_refer").Where("booking_code LIKE ? OR destination_city LIKE ? OR vessel LIKE ? OR shipper_name LIKE ? OR package_type LIKE ? OR quantity LIKE ? OR description_of_goods LIKE ? OR date_tally LIKE ? OR party_tally LIKE ? OR marking_data.marking LIKE ? OR status_tally LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%",
+				"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+		}
+	}
 }
 
 // TallySheet Search All tallysheet
 func TallySheet(w http.ResponseWriter, r *http.Request) {
 	var tallysheet []models.TallySheet
-	if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+	//var meta models.MetaData
+
+	if err := models.DB.Preload(clause.Associations).Scopes(searching(r), paginate(r)).Find(&tallysheet).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			response := map[string]any{"error": true, "message": "There is no Tallysheet! :("}
@@ -39,11 +82,28 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	//if err := models.DB.Preload(clause.Associations).Find(&tallysheet).Error; err != nil {
+	//	switch err {
+	//	case gorm.ErrRecordNotFound:
+	//		response := map[string]any{"error": true, "message": "There is no Tallysheet! :("}
+	//		helper.ResponseError(w, http.StatusNotFound, response)
+	//		return
+	//	default:
+	//		response := map[string]any{"error": true, "message": err.Error()}
+	//		helper.ResponseError(w, http.StatusInternalServerError, response)
+	//		return
+	//	}
+	//}
 
 	var TSOutput AllTallySheetOutput
 	//TSOutput.Code = http.StatusOK
 	TSOutput.Error = false
 	TSOutput.InventoryData = tallysheet
+	TSOutput.MetaData.Page = TSOutput.MetaData.GetPage(r)
+	TSOutput.MetaData.Limit = TSOutput.MetaData.GetLimit(r)
+	var ts models.TallySheet
+	TSOutput.MetaData.TotalRows = TSOutput.MetaData.GetTotalRows(models.DB, &ts)
+	TSOutput.MetaData.TotalPages = TSOutput.MetaData.GetTotalPages(models.DB, &ts, r)
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
