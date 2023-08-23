@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/Gateway-Container-Line/auth-service/middlewares"
+	_ "github.com/Gateway-Container-Line/auth-service/models"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/admincontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/documentconfirmationcontroller"
 	"github.com/Gateway-Container-Line/tallysheet-service/controllers/tallysheetcontroller"
@@ -35,6 +37,7 @@ type Result struct {
 //}
 
 func main() {
+	//modelTally.ConnectDatabase()
 	models.ConnectDatabase()
 	logrus.Println("Server running up...")
 	r := mux.NewRouter().StrictSlash(true).UseEncodedPath()
@@ -127,6 +130,17 @@ func main() {
 	r.HandleFunc("/api/count/cargoinrack", admincontroller.CountCargoInRack).Methods("GET")
 	//Count Cargo Loaded in Container
 	r.HandleFunc("/api/count/cargoloaded", admincontroller.CountCargoLoadedInContainer).Methods("GET")
+
+	testMid := r.PathPrefix("/test").Subrouter()
+	routeFunc := middlewares.Chain(tallysheetcontroller.JWTTest, middlewares.AuthFunc())
+	//testMid.HandleFunc("/get-tally-sheet", jwtauthcontroller.JWTTest).Methods("GET")
+	//testMid.HandleFunc("/get-tally-sheet", tallysheetcontroller.JWTTest).Methods("GET")
+	testMid.HandleFunc("/get-tally-sheet", routeFunc).Methods("GET")
+	//testMid.Use(middlewares.JWTMiddleware)
+
+	testmid2 := r.PathPrefix("/test2").Subrouter()
+	testmid2.HandleFunc("/get-tally-sheet", tallysheetcontroller.JWTTest).Methods(http.MethodGet)
+	testmid2.Use(middlewares.JWTMiddleware)
 
 	handler := cors.AllowAll().Handler(r)
 
