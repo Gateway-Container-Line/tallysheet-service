@@ -32,13 +32,10 @@ RUN apk update && apk add --no-cache git ca-certificates
 # additional private repo
 ARG GITHUB_PAT
 #ARG GITHUB_TOKEN
-##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
-#ENV CGO_ENABLED=0 GO111MODULE=on GOOS=linux TOKEN=$GITHUB_TOKEN
+#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
 ENV CGO_ENABLED=0 GO111MODULE=on GOOS=linux TOKEN=$GITHUB_PAT
 #
 RUN go env -w GOPRIVATE=github.com/Gateway-Container-Line/*
-#
-##RUN git config --global url."https://${TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 #RUN export GOPRIVATE="github.com/Gateway-Container-Line"
 #
 RUN git config --global url."https://${GITHUB_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
