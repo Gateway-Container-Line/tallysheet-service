@@ -3,7 +3,7 @@ module github.com/Gateway-Container-Line/tallysheet-service
 go 1.19
 
 require (
-	github.com/Gateway-Container-Line/auth-service v0.0.0-20230824064623-aea81ac36f2e
+	github.com/Gateway-Container-Line/auth-service v0.0.0-20230831042030-e2e3a950cf25
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/cors v1.9.0
 	github.com/shopspring/decimal v1.3.1

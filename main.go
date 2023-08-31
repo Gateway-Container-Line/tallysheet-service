@@ -139,7 +139,8 @@ func main() {
 	//testMid.Use(middlewares.JWTMiddleware)
 
 	testmid2 := r.PathPrefix("/test2").Subrouter()
-	testmid2.HandleFunc("/get-tally-sheet", tallysheetcontroller.JWTTest).Methods(http.MethodGet)
+	testmid2.HandleFunc("/get-tally-sheet", tallysheetcontroller.TallySheet).Methods(http.MethodGet)
+	//testmid2.HandleFunc("/get-tally-sheet", tallysheetcontroller.JWTTest).Methods(http.MethodGet)
 	testmid2.Use(middlewares.JWTMiddleware)
 
 	handler := cors.AllowAll().Handler(r)
