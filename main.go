@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Result struct {
@@ -75,36 +76,47 @@ func main() {
 	//r.HandleFunc("/api/quotation-data", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
 	//r.HandleFunc("/api/scan/in/{booking-code}", bookingconfirmationcontroller.GetBookingConfirmationData).Methods("GET")
 
+	tallySheetRoute := r.PathPrefix("/api").Subrouter()
 	//List all tally
-	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
+	//r.HandleFunc("/api/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
+	tallySheetRoute.HandleFunc("/tally-sheet", tallysheetcontroller.TallySheet).Methods("GET")
 
 	//tally sheet detail
 	//r.HandleFunc("/api/tally-sheet",tallysheetcontroller.TallySheetDetail).Methods("GET")
 	//router := mux.NewRouter().StrictSlash(true).UseEncodedPath()
-	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.TallySheetDetail).Methods("GET")
+	//r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.TallySheetDetail).Methods("GET")
+	tallySheetRoute.HandleFunc("/tally-sheet/{booking-code}", tallysheetcontroller.TallySheetDetail).Methods("GET")
 
 	//tallysheet get quantity
-	r.HandleFunc("/api/quantity-tally/{booking-code}", tallysheetcontroller.QuantityTally).Methods("GET")
+	//r.HandleFunc("/api/quantity-tally/{booking-code}", tallysheetcontroller.QuantityTally).Methods("GET")
 
 	//input tally
-	r.HandleFunc("/api/tally-sheet", tallysheetcontroller.InputTallyForm).Methods("POST")
+	tallySheetRoute.HandleFunc("/tally-sheet", tallysheetcontroller.InputTallyForm).Methods("POST")
+	//r.HandleFunc("/api/tally-sheet", tallysheetcontroller.InputTallyForm).Methods("POST")
 
 	//update tally
-	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.UpdateTallyForm).Methods("PUT")
+	tallySheetRoute.HandleFunc("/tally-sheet/{booking-code}", tallysheetcontroller.UpdateTallyForm).Methods("PUT")
+	//r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.UpdateTallyForm).Methods("PUT")
 
 	//delete tally
-	r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.DeleteTallySheet).Methods("DELETE")
+	tallySheetRoute.HandleFunc("/tally-sheet/{booking-code}", tallysheetcontroller.DeleteTallySheet).Methods("DELETE")
+	//r.HandleFunc("/api/tally-sheet/{booking-code}", tallysheetcontroller.DeleteTallySheet).Methods("DELETE")
 
 	//delete marking
-	r.HandleFunc("/api/tally-sheet/marking/delete", tallysheetcontroller.DeleteMarking).Methods("DELETE")
+	tallySheetRoute.HandleFunc("/tally-sheet/marking/delete", tallysheetcontroller.DeleteMarking).Methods("DELETE")
+	//r.HandleFunc("/api/tally-sheet/marking/delete", tallysheetcontroller.DeleteMarking).Methods("DELETE")
 	//r.HandleFunc("/api/tally-sheet/marking/{booking-code}/{marking}", tallysheetcontroller.DeleteMarking).Methods("DELETE")
 
 	//append Marking
-	r.HandleFunc("/api/tally-sheet/marking/append", tallysheetcontroller.AppendMarking).Methods("POST")
+	tallySheetRoute.HandleFunc("/tally-sheet/marking/append", tallysheetcontroller.AppendMarking).Methods("POST")
+	//r.HandleFunc("/api/tally-sheet/marking/append", tallysheetcontroller.AppendMarking).Methods("POST")
 	//r.HandleFunc("/api/tally-sheet/marking/{booking-code}", tallysheetcontroller.AppendMarking).Methods("PUT")
 
 	//update Marking
-	r.HandleFunc("/api/tally-sheet/marking/update", tallysheetcontroller.UpdateMarking).Methods("PUT")
+	tallySheetRoute.HandleFunc("/tally-sheet/marking/update", tallysheetcontroller.UpdateMarking).Methods("PUT")
+	//r.HandleFunc("/api/tally-sheet/marking/update", tallysheetcontroller.UpdateMarking).Methods("PUT")
+
+	tallySheetRoute.Use(middlewares.JWTMiddleware)
 
 	//tallysheet not in rack
 	r.HandleFunc("/api/tally-sheet-not-in-rack", tallysheetcontroller.TallyNotInRack).Methods("GET")
@@ -119,13 +131,15 @@ func main() {
 	//r.HandleFunc("/api/scan/in/{booking-code}", tallysheetcontroller.CargoInGETQuoteTally).Methods("GET")
 
 	//Count All Tally
-	r.HandleFunc("/api/count/tally-sheet", admincontroller.CountTallySheet).Methods("GET")
+	r.HandleFunc("/count", admincontroller.CountAllContent).Methods("GET")
+
+	//r.HandleFunc("/api/count/tally-sheet", admincontroller.CountTallySheet).Methods("GET")
 	//Count All Cargo In
-	r.HandleFunc("/api/count/cargo-in", admincontroller.CountCargoIn).Methods("GET")
+	//r.HandleFunc("/api/count/cargo-in", admincontroller.CountCargoIn).Methods("GET")
 	//Count All Cargo Out
-	r.HandleFunc("/api/count/cargo-out", admincontroller.CountCargoOut).Methods("GET")
+	//r.HandleFunc("/api/count/cargo-out", admincontroller.CountCargoOut).Methods("GET")
 	//Count All Cargo Coloaded
-	r.HandleFunc("/api/count/cargo-coloaded", admincontroller.CargoCoload).Methods("GET")
+	//r.HandleFunc("/api/count/cargo-coloaded", admincontroller.CargoCoload).Methods("GET")
 	//Count Tally In Rack
 	r.HandleFunc("/api/count/cargoinrack", admincontroller.CountCargoInRack).Methods("GET")
 	//Count Cargo Loaded in Container
@@ -143,7 +157,22 @@ func main() {
 	//testmid2.HandleFunc("/get-tally-sheet", tallysheetcontroller.JWTTest).Methods(http.MethodGet)
 	testmid2.Use(middlewares.JWTMiddleware)
 
-	handler := cors.AllowAll().Handler(r)
+	//handler := cors.AllowAll().Handler(r)
+
+	handler := cors.New(cors.Options{
+		AllowedOrigins: []string{os.Getenv("ORIGIN_FRONTEND")},
+		AllowedMethods: []string{
+			http.MethodHead,
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders:   []string{"Content-Type", "Set-Cookie", "Authorization", " Origin", "X-Requested-With", "Accept"},
+		AllowCredentials: true,
+	}).Handler(r)
 
 	//New(cors.Options{
 	//	AllowedOrigins:       []string{"*"},
