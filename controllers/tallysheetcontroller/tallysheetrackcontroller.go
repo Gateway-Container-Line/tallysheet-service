@@ -44,15 +44,15 @@ func QuantityTally(w http.ResponseWriter, r *http.Request) {
 
 type CargoNotInRackOutput struct {
 	gorm.Model
-	BookingCode     string
-	ShipperName     string
-	DestinationCity string `json:"Destination"`
-	ETD             string
-	Quantity        int64
-	ItemsReceived   int64
-	PackageType     string
-	RackingStatus   string `json:"RackStatus"`
-	ItemsInRack     *int   `json:"ItemInRack"`
+	BookingCode   string
+	ShipperName   string
+	Destination   string
+	ETD           string
+	Quantity      int64
+	ItemsReceived int64
+	PackageType   string
+	RackStatus    string
+	ItemInRack    *int
 }
 
 //func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
