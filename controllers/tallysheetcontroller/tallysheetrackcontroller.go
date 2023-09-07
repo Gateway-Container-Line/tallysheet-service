@@ -99,12 +99,15 @@ func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 	var tallysheet models.TallySheet
 	var Output []CargoNotInRackOutput
 	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
-		switch err {
-		case gorm.ErrRecordNotFound:
-			//helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
-			return Output, err
-		default:
-			//helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+		//switch err {
+		//case gorm.ErrRecordNotFound:
+		//	//helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
+		//	return Output, err
+		//default:
+		//	//helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+		//
+		//}
+		if err != gorm.ErrRecordNotFound {
 			return Output, err
 		}
 	}
