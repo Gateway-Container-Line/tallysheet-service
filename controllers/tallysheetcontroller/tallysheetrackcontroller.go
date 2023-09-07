@@ -44,15 +44,15 @@ func QuantityTally(w http.ResponseWriter, r *http.Request) {
 
 type CargoNotInRackOutput struct {
 	gorm.Model
-	BookingCode   string
-	ShipperName   string
-	Destination   string
-	ETD           string
-	Quantity      int64
-	ItemsReceived int64
-	PackageType   string
-	RackStatus    string
-	ItemInRack    *int
+	BookingCode     string
+	ShipperName     string
+	DestinationCity string `json:"Destination"`
+	ETD             string
+	Quantity        int64
+	ItemsReceived   int64
+	PackageType     string
+	RackingStatus   string `json:"RackStatus"`
+	ItemsInRack     *int   `json:"ItemInRack"`
 }
 
 //func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
@@ -76,40 +76,39 @@ type CargoNotInRackOutput struct {
 //helper.ResponseJSON(w, http.StatusOK, tallysheet)
 //}
 
-//func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
-//	logrus.Info("GET List Tally not in rack")
-//	var tallysheet models.TallySheet
-//	var Output []CargoNotInRackOutput
-//	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
-//		switch err {
-//		case gorm.ErrRecordNotFound:
-//			helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
-//			return
-//		default:
-//			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-//			return
-//		}
-//	}
-//	helper.ResponseJSON(w, http.StatusOK, Output)
-//}
-
-func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
+func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("GET List Tally not in rack")
-	models.ConnectDatabase()
 	var tallysheet models.TallySheet
 	var Output []CargoNotInRackOutput
 	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	helper.ResponseJSON(w, http.StatusOK, Output)
+}
+
+func TallyNotInRackList() (any, error) {
+	logrus.Info("GET List Tally not in rack")
+	var tallysheet models.TallySheet
+	var Output []CargoNotInRackOutput
+	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != gorm.ErrRecordNotFound {
 		//switch err {
 		//case gorm.ErrRecordNotFound:
 		//	//helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
-		//	return Output, err
+		//	return nil, err
 		//default:
 		//	//helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-		//
+		//	return nil, err
 		//}
-		if err != gorm.ErrRecordNotFound {
-			return Output, err
-		}
+		//if err != gorm.ErrRecordNotFound {
+		return Output, err
+		//}
 	}
 	//helper.ResponseJSON(w, http.StatusOK, Output)
 	return Output, nil
