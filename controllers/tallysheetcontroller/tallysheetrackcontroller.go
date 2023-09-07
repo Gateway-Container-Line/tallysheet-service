@@ -76,22 +76,22 @@ type CargoNotInRackOutput struct {
 //helper.ResponseJSON(w, http.StatusOK, tallysheet)
 //}
 
-func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
-	logrus.Info("GET List Tally not in rack")
-	var tallysheet models.TallySheet
-	var Output []CargoNotInRackOutput
-	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
-		switch err {
-		case gorm.ErrRecordNotFound:
-			helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
-			return
-		default:
-			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-	helper.ResponseJSON(w, http.StatusOK, Output)
-}
+//func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
+//	logrus.Info("GET List Tally not in rack")
+//	var tallysheet models.TallySheet
+//	var Output []CargoNotInRackOutput
+//	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != nil {
+//		switch err {
+//		case gorm.ErrRecordNotFound:
+//			helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
+//			return
+//		default:
+//			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+//			return
+//		}
+//	}
+//	helper.ResponseJSON(w, http.StatusOK, Output)
+//}
 
 func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 	logrus.Info("GET List Tally not in rack")
@@ -101,10 +101,10 @@ func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			//helper.ResponseError(w, http.StatusNotFound, "There was no record cargo not in rack")
-			return nil, err
+			return Output, err
 		default:
 			//helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-			return nil, err
+			return Output, err
 		}
 	}
 	//helper.ResponseJSON(w, http.StatusOK, Output)

@@ -119,7 +119,7 @@ func main() {
 	tallySheetRoute.Use(middlewares.JWTMiddleware)
 
 	//tallysheet not in rack
-	r.HandleFunc("/api/tally-sheet-not-in-rack", tallysheetcontroller.TallyNotInRack).Methods("GET")
+	//r.HandleFunc("/api/tally-sheet-not-in-rack", tallysheetcontroller.TallyNotInRack).Methods("GET")
 
 	//update tally surat jalan
 	r.HandleFunc("/api/surat-jalan/{booking-code}", documentconfirmationcontroller.ConfirmationSuratJalan).Methods("PUT")
