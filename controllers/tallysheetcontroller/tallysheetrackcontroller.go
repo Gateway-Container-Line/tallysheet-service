@@ -95,6 +95,7 @@ func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 
 func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 	logrus.Info("GET List Tally not in rack")
+	models.ConnectDatabase()
 	var tallysheet models.TallySheet
 	var Output []CargoNotInRackOutput
 	if err := models.DB.Model(&tallysheet).Session(&gorm.Session{Context: context.Background()}).Where("racking_status = 'false' AND items_received <> items_in_rack").Find(&Output).Error; err != gorm.ErrRecordNotFound {
