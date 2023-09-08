@@ -109,6 +109,7 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 
 type TallySheetOutput struct {
 	Error          bool              `json:"error,omitempty"`
+	Message        string            `json:"message,omitempty"`
 	TallysheetData models.TallySheet `json:"tallysheet_data"`
 	MetaData       struct{}          `json:"meta_data,omitempty"`
 }
@@ -144,6 +145,45 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	TSOutput.Error = false
 	TSOutput.TallysheetData = tallysheet
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
+}
+
+func CheckingTallysheet(bookingCode string) (TallySheetOutput, error) {
+
+	//paramurl := mux.Vars(r)
+	//bookingCode := paramurl["booking-code"]
+	models.ConnectDatabase()
+	bookingCode, _ = url.QueryUnescape(bookingCode)
+	logrus.Info("BC : " + bookingCode)
+	var TSOutput TallySheetOutput
+	var tallysheet models.TallySheet
+	if err := models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).Error; err != nil {
+		//switch err {
+		//case gorm.ErrRecordNotFound:
+		//	response := map[string]any{"error": true, "message": "Tallysheet Not Found! :("}
+		//	helper.ResponseError(w, http.StatusNotFound, response)
+		//	return
+		//default:
+		//	helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+		//	return
+		//}
+		if err != gorm.ErrRecordNotFound {
+			TSOutput.Error = true
+			TSOutput.Message = err.Error()
+			return TSOutput, err
+		}
+	}
+	//if models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tallysheet Not Found!"}
+	//	helper.ResponseJSON(w, http.StatusNotFound, response)
+	//	return
+	//}
+	//tallysheet.Error = false
+	tallysheet.ETD = helper.TruncateDateText(tallysheet.ETD, 10)
+	tallysheet.DateTally = helper.TruncateDateText(tallysheet.DateTally, 16)
+	TSOutput.Error = false
+	TSOutput.TallysheetData = tallysheet
+	//helper.ResponseJSON(w, http.StatusOK, TSOutput)
+	return TSOutput, nil
 }
 
 type OutputRequestQuoteTally struct {
