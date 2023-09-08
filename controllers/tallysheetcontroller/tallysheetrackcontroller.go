@@ -93,7 +93,7 @@ func TallyNotInRack(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseJSON(w, http.StatusOK, Output)
 }
 
-func TallyNotInRackList() (any, error) {
+func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 	logrus.Info("GET List Tally not in rack")
 	var tallysheet models.TallySheet
 	var Output []CargoNotInRackOutput
