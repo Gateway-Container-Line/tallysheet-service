@@ -147,12 +147,12 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
-func CheckingTallysheet(bookingCode string) (TallySheetOutput, error) {
+func CheckingTallySheet(bookingCode string) (TallySheetOutput, error) {
 
 	//paramurl := mux.Vars(r)
 	//bookingCode := paramurl["booking-code"]
 	models.ConnectDatabase()
-	bookingCode, _ = url.QueryUnescape(bookingCode)
+	//bookingCode, _ = url.QueryUnescape(bookingCode)
 	logrus.Info("BC : " + bookingCode)
 	var TSOutput TallySheetOutput
 	var tallysheet models.TallySheet
