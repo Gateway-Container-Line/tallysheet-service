@@ -189,3 +189,46 @@ func DeleteTallySheet(w http.ResponseWriter, r *http.Request) {
 
 	logrus.Info("Berhasil menghapus data dari DB")
 }
+
+func UpdateTally(bookingCode string, tallysheet models.TallySheet) error {
+	//paramurl := mux.Vars(r)
+	//bookingCode := paramurl["booking-code"]
+	bookingCode, _ = url.QueryUnescape(bookingCode)
+
+	logrus.Info("Success getting booking code from parsing variable module . data : " + bookingCode)
+
+	// input data to struct tallysheet
+	//var tallysheet models.TallySheet
+	//decoder := json.NewDecoder(r.body)
+	//if err := decoder.Decode(&tallysheet); err != nil {
+	//	helper.ResponseError(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	//
+	//defer r.Body.Close()
+
+	//upsert
+	//if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Clauses(clause.OnConflict{UpdateAll: true}).Updates(&tallysheet).RowsAffected == 0 {
+	//	helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
+	//	return
+	//}
+	//update
+	if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
+		//helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
+		return gorm.ErrRecordNotFound
+	}
+
+	tallysheet.BookingCode = bookingCode
+	//.Session(&gorm.Session{FullSaveAssociations: true})
+	//if models.DB.Model(&tallysheet.TallyTable).Where("IdTable = ?", tallysheet.TallyTableIdTable).Updates(&tallysheet).RowsAffected == 0 {
+	//	response := map[string]string{"message": "Tallysheet Not Found!"}
+	//	helper.ResponseJSON(w, http.StatusBadRequest, response)
+	//	return
+	//}
+
+	//response := map[string]string{"message": "TallySheet Updated Successfully!"}
+	//helper.ResponseJSON(w, http.StatusOK, response)
+
+	logrus.Info("Berhasil mengupdate data tallysheet")
+	return nil
+}
