@@ -166,11 +166,14 @@ func CheckingTallySheet(bookingCode string) (TallySheetOutput, error) {
 		//	helper.ResponseError(w, http.StatusInternalServerError, err.Error())
 		//	return
 		//}
-		if err != gorm.ErrRecordNotFound {
-			TSOutput.Error = true
-			TSOutput.Message = err.Error()
-			return TSOutput, err
-		}
+		TSOutput.Error = true
+		TSOutput.Message = err.Error()
+		return TSOutput, err
+		//if err != gorm.ErrRecordNotFound {
+		//	TSOutput.Error = true
+		//	TSOutput.Message = err.Error()
+		//	return TSOutput, err
+		//}
 	}
 	//if models.DB.Where("booking_code = ?", bookingCode).Preload(clause.Associations).First(&tallysheet).RowsAffected == 0 {
 	//	response := map[string]string{"message": "Tallysheet Not Found!"}
