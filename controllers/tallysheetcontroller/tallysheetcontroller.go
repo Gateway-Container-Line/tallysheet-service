@@ -108,10 +108,10 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 }
 
 type TallySheetOutput struct {
-	Error          bool               `json:"error,omitempty"`
-	Message        string             `json:"message,omitempty"`
-	TallysheetData *models.TallySheet `json:"tallysheet_data,omitempty"`
-	MetaData       struct{}           `json:"meta_data,omitempty"`
+	Error          bool              `json:"error,omitempty"`
+	Message        string            `json:"message,omitempty"`
+	TallysheetData models.TallySheet `json:"tallysheet_data,omitempty"`
+	MetaData       struct{}          `json:"meta_data,omitempty"`
 }
 
 func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
@@ -143,7 +143,7 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	tallysheet.DateTally = helper.TruncateDateText(tallysheet.DateTally, 16)
 	var TSOutput TallySheetOutput
 	TSOutput.Error = false
-	TSOutput.TallysheetData = &tallysheet
+	TSOutput.TallysheetData = tallysheet
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
@@ -168,7 +168,6 @@ func CheckingTallySheet(bookingCode string) (TallySheetOutput, error) {
 		//}
 		TSOutput.Error = true
 		TSOutput.Message = err.Error()
-		TSOutput.TallysheetData = nil
 		return TSOutput, err
 		//if err != gorm.ErrRecordNotFound {
 		//	TSOutput.Error = true
@@ -185,7 +184,7 @@ func CheckingTallySheet(bookingCode string) (TallySheetOutput, error) {
 	tallysheet.ETD = helper.TruncateDateText(tallysheet.ETD, 10)
 	tallysheet.DateTally = helper.TruncateDateText(tallysheet.DateTally, 16)
 	TSOutput.Error = false
-	TSOutput.TallysheetData = &tallysheet
+	TSOutput.TallysheetData = tallysheet
 	//helper.ResponseJSON(w, http.StatusOK, TSOutput)
 	return TSOutput, nil
 }
