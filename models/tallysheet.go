@@ -236,3 +236,44 @@ func (ts *TallySheet) BeforeUpdate(tx *gorm.DB) (err error) {
 	}
 	return nil
 }
+
+//func (ts *TallySheet) CheckStatus(tallyData TallySheet) (sheet TallySheet) {
+//	InOutData := tallyData.CargoInOutHistory.Data()
+//	if len(InOutData) > 0 {
+//		var totalItemReceived int16
+//		var totalDamagedItems int16
+//		for _, value := range tallyData.CargoInOutHistory.Data() {
+//			if value.InOutType == "ArrivalData" {
+//				totalItemReceived += value.TotalInOutQuantity
+//				totalDamagedItems += value.ArrivalData.DetailedArrivalData.Damage
+//			} else if value.InOutType == "ExitingData" {
+//				totalItemReceived -= value.TotalInOutQuantity
+//			}
+//		}
+//
+//		if InOutData[len(InOutData)-1].InOutType == "ExitingData" {
+//			if InOutData[len(InOutData)-1].ExitingData.ExitType == "Stuffing" {
+//				tallyData.StatusTally = "Stuffing"
+//			} else if InOutData[len(InOutData)-1].ExitingData.ExitType == "Coload" {
+//				tallyData.StatusTally = "Coload"
+//			} else if InOutData[len(InOutData)-1].ExitingData.ExitType == "CargoAllOut" {
+//				tallyData.StatusTally = "Canceled"
+//			}
+//		} else {
+//			if totalItemReceived == tallyData.Quantity {
+//				if totalDamagedItems > 0 {
+//					tallyData.StatusTally = "Damaged"
+//				} else if totalDamagedItems == 0 {
+//					tallyData.StatusTally = "CargoIn"
+//				}
+//			} else if totalItemReceived < tallyData.Quantity {
+//				tallyData.StatusTally = "Short"
+//			} else if totalItemReceived > tallyData.Quantity {
+//				tallyData.StatusTally = "Over"
+//			}
+//		}
+//	}
+//	//tx.Model(&ts.StatusTally).Save(&ts.StatusTally)
+//	//DB.Model(&ts.StatusTally).Save(&ts.StatusTally)
+//	return tallyData
+//}

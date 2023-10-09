@@ -112,6 +112,7 @@ func TallyNotInRackList() ([]CargoNotInRackOutput, error) {
 		//}
 	}
 	//helper.ResponseJSON(w, http.StatusOK, Output)
+	models.CloseConnection()
 	return Output, nil
 }
 

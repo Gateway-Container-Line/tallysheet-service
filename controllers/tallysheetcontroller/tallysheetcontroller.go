@@ -67,6 +67,7 @@ func searching(r *http.Request) func(db *gorm.DB) *gorm.DB {
 
 // TallySheet Search All tallysheet
 func TallySheet(w http.ResponseWriter, r *http.Request) {
+	models.ConnectDatabase()
 	var tallysheet []models.TallySheet
 	//var meta models.MetaData
 
@@ -104,6 +105,8 @@ func TallySheet(w http.ResponseWriter, r *http.Request) {
 	var ts models.TallySheet
 	TSOutput.MetaData.TotalRows = TSOutput.MetaData.GetTotalRows(models.DB, &ts)
 	TSOutput.MetaData.TotalPages = TSOutput.MetaData.GetTotalPages(models.DB, &ts, r)
+
+	models.CloseConnection()
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
@@ -115,7 +118,7 @@ type TallySheetOutput struct {
 }
 
 func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
-
+	models.ConnectDatabase()
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
 	bookingCode, _ = url.QueryUnescape(bookingCode)
@@ -144,6 +147,7 @@ func TallySheetDetail(w http.ResponseWriter, r *http.Request) {
 	var TSOutput TallySheetOutput
 	TSOutput.Error = false
 	TSOutput.TallysheetData = tallysheet
+	models.CloseConnection()
 	helper.ResponseJSON(w, http.StatusOK, TSOutput)
 }
 
@@ -186,6 +190,7 @@ func CheckingTallySheet(bookingCode string) (TallySheetOutput, error) {
 	TSOutput.Error = false
 	TSOutput.TallysheetData = tallysheet
 	//helper.ResponseJSON(w, http.StatusOK, TSOutput)
+	models.CloseConnection()
 	return TSOutput, nil
 }
 

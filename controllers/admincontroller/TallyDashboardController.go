@@ -49,7 +49,7 @@ func CountCargoOut() (int64, error) {
 	//func CountCargoOut(w http.ResponseWriter, r *http.Request) {
 	var count int64
 	var tallysheet []models.TallySheet
-	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Out%'").Find(&tallysheet).Count(&count).Error; err != nil {
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%CargoOut%'").Find(&tallysheet).Count(&count).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			//helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
@@ -95,6 +95,76 @@ func CargoDamaged() (int64, error) {
 	return count, nil
 }
 
+func CargoTemporaryOut() (int64, error) {
+	var count int64
+	var tallysheet []models.TallySheet
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Temporary%'").Find(&tallysheet).Count(&count).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return 0, err
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
+func CargoShort() (int64, error) {
+	var count int64
+	var tallysheet []models.TallySheet
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Short%'").Find(&tallysheet).Count(&count).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return 0, err
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
+func CargoOver() (int64, error) {
+	var count int64
+	var tallysheet []models.TallySheet
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Over%'").Find(&tallysheet).Count(&count).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return 0, err
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
+func CargoCanceled() (int64, error) {
+	var count int64
+	var tallysheet []models.TallySheet
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Cancel%'").Find(&tallysheet).Count(&count).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return 0, err
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
+func CountCargoLoadedInContainer() (int64, error) {
+	var count int64
+	var tallysheet []models.TallySheet
+	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Loaded%'").Find(&tallysheet).Count(&count).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return 0, err
+		default:
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
 func CountCargoInRack(w http.ResponseWriter, r *http.Request) {
 	var count int64
 	var tallysheet []models.TallySheet
@@ -111,34 +181,23 @@ func CountCargoInRack(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseJSON(w, http.StatusOK, count)
 }
 
-func CountCargoLoadedInContainer(w http.ResponseWriter, r *http.Request) {
-	var count int64
-	var tallysheet []models.TallySheet
-	if err := models.DB.Preload(clause.Associations).Where("`status_tally` LIKE '%Loaded%'").Find(&tallysheet).Count(&count).Error; err != nil {
-		switch err {
-		case gorm.ErrRecordNotFound:
-			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
-			return
-		default:
-			helper.ResponseError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+type CountOutput struct {
+	CountCargo struct {
+		CountTotalTallysheet   int64
+		CountCargoIn           int64
+		CountCargoDamaged      int64
+		CountCargoOut          int64
+		CountCargoTemporaryOut int64
+		CountCargoColoaded     int64
+		CargoShort             int64
+		CargoOver              int64
+		CargoCanceled          int64
+		CountLoadedCargo       int64
 	}
-	helper.ResponseJSON(w, http.StatusOK, count)
-}
-
-type CountRoleUser struct {
-	CountTotalTallysheet   int64
-	CountUnloadedStuffing  int
-	CountCargoIn           int64
-	CountCargoDamaged      int64
-	CountCargoOut          int64
-	CountCargoTemporaryOut int64
-	CountCargoColoaded     int64
-	CargoShort             int64
-	CargoOver              int64
-	CargoCanceled          int64
-	CountCargoStuffing     int64
+	CountStuffing struct {
+		CountUnloadedStuffing int64
+		CountLoadedStuffing   int64
+	}
 }
 
 func CountAllContent(w http.ResponseWriter, r *http.Request) {
@@ -207,11 +266,72 @@ func CountAllContent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var countRoleUserResult CountRoleUser
-	countRoleUserResult.CountTotalTallysheet = TallysheetCountResult
-	countRoleUserResult.CountCargoIn = TallysheetCargoInCountResult
-	countRoleUserResult.CountCargoOut = TallysheetCargoOutCountResult
-	countRoleUserResult.CountCargoColoaded = TallysheetColoadCountResult
-	countRoleUserResult.CountCargoDamaged = TallysheetDamagedCountResult
-	helper.ResponseJSON(w, http.StatusOK, countRoleUserResult)
+	TallysheetTemporaryOutCountResult, errTemporaryOut := CargoTemporaryOut()
+	if errTemporaryOut != nil {
+		switch errTemporaryOut {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, errTemporaryOut.Error())
+		}
+	}
+
+	TallysheetShortCountResult, errShort := CargoShort()
+	if errShort != nil {
+		switch errShort {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, errTemporaryOut.Error())
+		}
+	}
+
+	TallysheetOverCountResult, errOver := CargoOver()
+	if errOver != nil {
+		switch errOver {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, errTemporaryOut.Error())
+		}
+	}
+
+	TallysheetCanceledCountResult, errCanceled := CargoCanceled()
+	if errCanceled != nil {
+		switch errCanceled {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, errTemporaryOut.Error())
+		}
+	}
+
+	TallysheetLoadedCountResult, errLoaded := CountCargoLoadedInContainer()
+	if errLoaded != nil {
+		switch errLoaded {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseError(w, http.StatusNotFound, "There is no Tallysheet!")
+			return
+		default:
+			helper.ResponseError(w, http.StatusInternalServerError, errTemporaryOut.Error())
+		}
+	}
+
+	var countOutputResult CountOutput
+	countOutputResult.CountCargo.CountTotalTallysheet = TallysheetCountResult
+	countOutputResult.CountCargo.CountCargoIn = TallysheetCargoInCountResult
+	countOutputResult.CountCargo.CountCargoOut = TallysheetCargoOutCountResult
+	countOutputResult.CountCargo.CountCargoColoaded = TallysheetColoadCountResult
+	countOutputResult.CountCargo.CountCargoDamaged = TallysheetDamagedCountResult
+	countOutputResult.CountCargo.CountCargoTemporaryOut = TallysheetTemporaryOutCountResult
+	countOutputResult.CountCargo.CargoShort = TallysheetShortCountResult
+	countOutputResult.CountCargo.CargoOver = TallysheetOverCountResult
+	countOutputResult.CountCargo.CargoCanceled = TallysheetCanceledCountResult
+	countOutputResult.CountCargo.CountLoadedCargo = TallysheetLoadedCountResult
+
+	helper.ResponseJSON(w, http.StatusOK, countOutputResult)
 }

@@ -25,6 +25,12 @@ func ConnectDatabase() {
 	db.AutoMigrate(&TallySheet{}, &MarkingData{})
 	db.SetupJoinTable(&TallySheet{}, "MarkingData", &MarkingData{})
 	//db.SetupJoinTable(&MarkingData{}, "MarkingDetail", &MarkingDetail{})
+
 	DB = db
 	logrus.Info("berhasil connect ke database")
+}
+
+func CloseConnection() {
+	sqldb, _ := DB.DB()
+	sqldb.Close()
 }

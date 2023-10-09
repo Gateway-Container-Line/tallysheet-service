@@ -14,6 +14,7 @@ import (
 
 func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//mengambil inputan json yang diterima dari frontend
+	models.ConnectDatabase()
 	var tallyInput models.TallySheet
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&tallyInput); err != nil {
@@ -47,6 +48,7 @@ func InputTallyForm(w http.ResponseWriter, r *http.Request) {
 	//	logrus.Error("Unable To Set Data to Redis.", err)
 	//	return
 	//}
+	models.CloseConnection()
 	logrus.Info("Success Create Tallysheet")
 }
 
@@ -122,7 +124,7 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	//	w.Write([]byte("allowed"))
 	//	return
 	//}
-
+	models.ConnectDatabase()
 	paramurl := mux.Vars(r)
 	bookingCode := paramurl["booking-code"]
 	bookingCode, _ = url.QueryUnescape(bookingCode)
@@ -154,7 +156,10 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 	//update
-	if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
+	//TallyWithUpdatedStatus := CheckStatus(tallysheet)
+
+	//if models.DB.Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
+	if models.DB.Model(&tallysheet).Set("gorm:auto_preload", true).Where("booking_code = ?", bookingCode).Session(&gorm.Session{FullSaveAssociations: true}).Updates(&tallysheet).RowsAffected == 0 {
 		helper.ResponseError(w, http.StatusBadRequest, "Tidak Dapat Mengupdate Tallysheet")
 		return
 	}
@@ -170,6 +175,7 @@ func UpdateTallyForm(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{"message": "TallySheet Updated Successfully!"}
 	helper.ResponseJSON(w, http.StatusOK, response)
 
+	models.CloseConnection()
 	logrus.Info("Berhasil mengupdate data tallysheet")
 
 }

@@ -143,7 +143,7 @@ func main() {
 	//Count Tally In Rack
 	r.HandleFunc("/api/count/cargoinrack", admincontroller.CountCargoInRack).Methods("GET")
 	//Count Cargo Loaded in Container
-	r.HandleFunc("/api/count/cargoloaded", admincontroller.CountCargoLoadedInContainer).Methods("GET")
+	//r.HandleFunc("/api/count/cargoloaded", admincontroller.CountCargoLoadedInContainer).Methods("GET")
 
 	testMid := r.PathPrefix("/test").Subrouter()
 	routeFunc := middlewares.Chain(tallysheetcontroller.JWTTest, middlewares.AuthFunc())
