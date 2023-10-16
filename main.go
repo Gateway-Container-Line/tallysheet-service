@@ -160,7 +160,8 @@ func main() {
 	//handler := cors.AllowAll().Handler(r)
 
 	handler := cors.New(cors.Options{
-		AllowedOrigins: []string{os.Getenv("ORIGIN_FRONTEND")},
+		AllowedOrigins: []string{os.Getenv("ORIGIN_PROXY")},
+		//AllowedOrigins: []string{os.Getenv("ORIGIN_FRONTEND")},
 		AllowedMethods: []string{
 			http.MethodHead,
 			http.MethodGet,
